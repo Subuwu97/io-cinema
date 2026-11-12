@@ -8,8 +8,49 @@ let probeMissing=false;
 async function readTags(file,root){const fallback=fallbackTags(file,root);if(probeMissing)return fallback;try{const {stdout}=await run('ffprobe',['-v','quiet','-show_entries','format=duration:format_tags=title,artist,album,album_artist,track,disc,genre,date:stream=codec_type:stream_disposition=attached_pic','-of','json',file],{timeout:8000,maxBuffer:128*1024,windowsHide:true});const parsed=JSON.parse(stdout),data=parsed.format||{},tags=Object.fromEntries(Object.entries(data.tags||{}).map(([k,v])=>[k.toLowerCase(),v]));const text=k=>String(tags[k]||'').trim().slice(0,400);return{...fallback,title:text('title')||fallback.title,artist:text('artist')||text('album_artist')||fallback.artist,album:text('album')||fallback.album,albumArtist:text('album_artist')||text('artist')||fallback.artist,genre:text('genre'),year:text('date').slice(0,4),track:parseInt(tags.track)||fallback.track,disc:parseInt(tags.disc)||1,duration:Number(data.duration)||0,hasCover:(parsed.streams||[]).some(stream=>stream.disposition?.attached_pic===1)};}catch(error){if(error.code==='ENOENT')probeMissing=true;return fallback;}}
 class MusicLibrary{
  constructor({root='',probe=readTags}={}){this.root=root;this.probe=probe;this.tracks=new Map();this.albums=new Map();this.cache=new Map();this.scanning=false;this.error='';this.generation=0;this.truncated=false;}
- async scan(){if(this.scanning)return;const generation=++this.generation;this.scanning=true;this.error='';this.truncated=false;try{if(!this.root){this.tracks.clear();this.albums.clear();return;}const root=await fs.realpath(this.root);const files=[];const walk=async(dir,depth=0)=>{if(depth>24||files.length>=20000){this.truncated=true;return;}for(const entry of await fs.readdir(dir,{withFileTypes:true})){if(entry.isSymbolicLink()||entry.name.startsWith('.'))continue;const file=path.join(dir,entry.name);if(entry.isDirectory())await walk(file,depth+1);else if(entry.isFile()&&AUDIO.has(path.extname(file).toLowerCase()))files.push(file);if(files.length>=20000){this.truncated=true;break;}}};await walk(root);const tracks=new Map(),albums=new Map();const usedKeys=new Set();let cursor=0;await Promise.all(Array.from({length:Math.min(4,files.length)},async()=>{while(cursor<files.length){const file=files[cursor++];try{const real=await fs.realpath(file);if(!isWithin(root,real))continue;const stat=await fs.stat(real),key=`${real}:${stat.size}:${stat.mtimeMs}`;const tags=this.cache.get(key)||await this.probe(real,root);this.cache.set(key,tags);usedKeys.add(key);const folder=path.dirname(real),albumId=id(root+'\0'+folder+'\0'+tags.album+'\0'+(tags.albumArtist||tags.artist)),trackId=id(root+'\0'+path.relative(root,real));const track={...tags,id:trackId,albumId,format:path.extname(real).slice(1).toUpperCase(),file:real};tracks.set(trackId,track);if(!albums.has(albumId)){let cover=null;for(const name of ['cover.jpg','folder.jpg','cover.png','folder.png','cover.webp'])try{const candidate=await fs.realpath(path.join(folder,name));if(isWithin(root,candidate)){cover=candidate;break;}}catch{}albums.set(albumId,{id:albumId,title:tags.album,artist:tags.albumArtist||tags.artist,year:tags.year||'',cover,embedded:tags.hasCover?real:null,tracks:[]});}if(tags.hasCover&&!albums.get(albumId).embedded)albums.get(albumId).embedded=real;albums.get(albumId).tracks.push(trackId);}catch{}}}));if(generation===this.generation){this.realRoot=root;this.tracks=tracks;this.albums=albums;this.cache=new Map([...this.cache].filter(([key])=>usedKeys.has(key)));}}catch(e){this.error='Music folder could not be scanned. Check the folder and server read permissions.';}finally{this.scanning=false;}}
- json(){return{configured:!!this.root,scanning:this.scanning,error:this.error,truncated:this.truncated,tracks:[...this.tracks.values()].map(({file,...t})=>t).sort((a,b)=>a.disc-b.disc||a.track-b.track||a.title.localeCompare(b.title)),albums:[...this.albums.values()].map(({cover,embedded,...a})=>({...a,cover:cover||embedded?`/api/music/cover/${a.id}`:null})).sort((a,b)=>a.artist.localeCompare(b.artist)||a.title.localeCompare(b.title))};}
+ async scan(){
+  if(this.scanning)return;
+  ++this.generation;this.scanning=true;this.error='';this.truncated=false;
+  this.progress={phase:'finding files',discovered:0,processed:0,skipped:0};
+  try{
+   if(!this.root){this.tracks.clear();this.albums.clear();return;}
+   const root=await fs.realpath(this.root),files=[];this.realRoot=root;
+   const walk=async(dir,depth=0)=>{
+    if(depth>24||files.length>=20000){this.truncated=true;return;}
+    let entries;try{entries=await fs.readdir(dir,{withFileTypes:true});}catch{this.progress.skipped++;return;}
+    for(const entry of entries){
+     if(entry.isSymbolicLink()||entry.name.startsWith('.'))continue;
+     const file=path.join(dir,entry.name);
+     if(entry.isDirectory())await walk(file,depth+1);
+     else if(entry.isFile()&&AUDIO.has(path.extname(file).toLowerCase())){files.push(file);this.progress.discovered=files.length;}
+     if(files.length>=20000){this.truncated=true;break;}
+    }
+   };
+   await walk(root);
+   if(!files.length){if(this.progress.skipped)throw Error('unreadable');this.tracks.clear();this.albums.clear();return;}
+   const tracks=new Map(),albums=new Map(),covers=new Map(),usedKeys=new Set();this.tracks=tracks;this.albums=albums;
+   const add=async(real,tags)=>{
+    const folder=path.dirname(real),albumId=id(root+'\0'+folder+'\0'+tags.album+'\0'+(tags.albumArtist||tags.artist)),trackId=id(root+'\0'+path.relative(root,real)),old=tracks.get(trackId);
+    if(old&&old.albumId!==albumId){const previous=albums.get(old.albumId);if(previous){previous.tracks=previous.tracks.filter(t=>t!==trackId);if(!previous.tracks.length)albums.delete(old.albumId);}}
+    tracks.set(trackId,{...tags,id:trackId,albumId,format:path.extname(real).slice(1).toUpperCase(),file:real});
+    if(!albums.has(albumId)){
+     if(!covers.has(folder)){let cover=null;for(const name of ['cover.jpg','folder.jpg','cover.png','folder.png','cover.webp'])try{const candidate=await fs.realpath(path.join(folder,name));if(isWithin(root,candidate)){cover=candidate;break;}}catch{}covers.set(folder,cover);}
+     if(!albums.has(albumId))albums.set(albumId,{id:albumId,title:tags.album,artist:tags.albumArtist||tags.artist,year:tags.year||'',cover:covers.get(folder),embedded:tags.hasCover?real:null,tracks:[]});
+    }
+    const album=albums.get(albumId);if(!album.tracks.includes(trackId))album.tracks.push(trackId);if(tags.hasCover&&!album.embedded)album.embedded=real;
+   };
+   // Make songs playable before slow NAS tag probes finish.
+   this.progress.phase='indexing songs';const safeFiles=[];
+   for(const file of files)try{const real=await fs.realpath(file);if(!isWithin(root,real)){this.progress.skipped++;continue;}safeFiles.push(real);await add(real,fallbackTags(real,root));}catch{this.progress.skipped++;}
+   this.progress.phase='reading tags';let cursor=0;
+   await Promise.all(Array.from({length:Math.min(4,safeFiles.length)},async()=>{
+    while(cursor<safeFiles.length){const real=safeFiles[cursor++];try{const stat=await fs.stat(real),key=`${real}:${stat.size}:${stat.mtimeMs}`;const tags=this.cache.get(key)||await this.probe(real,root);this.cache.set(key,tags);usedKeys.add(key);await add(real,tags);}catch{this.progress.skipped++;}finally{this.progress.processed++;}}
+   }));
+   this.cache=new Map([...this.cache].filter(([key])=>usedKeys.has(key)));
+  }catch{this.error='Music folder could not be scanned. Check that it is mounted on this server and readable by the Cinema service.';}
+  finally{this.scanning=false;this.progress.phase=this.error?'failed':'finished';if(!this.error&&!this.tracks.size)this.error='No supported audio files found. Check the server folder and its subfolders.';}
+ }
+ json(){return{configured:!!this.root,scanning:this.scanning,error:this.error,progress:this.progress||null,truncated:this.truncated,tracks:[...this.tracks.values()].map(({file,...t})=>t).sort((a,b)=>a.disc-b.disc||a.track-b.track||a.title.localeCompare(b.title)),albums:[...this.albums.values()].map(({cover,embedded,...a})=>({...a,cover:cover||embedded?`/api/music/cover/${a.id}`:null})).sort((a,b)=>a.artist.localeCompare(b.artist)||a.title.localeCompare(b.title))};}
  async safeFile(file){if(!file||!this.realRoot)return null;try{const real=await fs.realpath(file);return isWithin(this.realRoot,real)&& (await fs.stat(real)).isFile()?real:null;}catch{return null;}}
 }
 function registerMusic(app,{requireAuth,requireAdmin,dataDir,publicOrigin=()=>''}){

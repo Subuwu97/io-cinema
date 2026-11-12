@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.2.1, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.2.2, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -65,3 +65,11 @@ Open a movie or TV-series page and choose **Import from OMDb**. Search by title 
 This uses OMDb's title/search API for movie and series records; it does not automatically match the whole library or replace episode filenames. Your own valid OMDb key and plan limits apply. See https://www.omdbapi.com/ for API details and content terms.
 
 Music folder configuration is now expanded at the top of the Music page and also appears in **Settings → Media folders → Music directory**. This is an administrator-only server setting; ordinary accounts can browse and play music but cannot change the shared root. Thirteen focused tests pass, including OMDb request caching, private-key handling, metadata preservation and poster validation. Live OMDb requests still require your own key.
+
+## Music scan progress and whole-library OMDb (0.2.2)
+
+Music scans now publish filename-based playable entries before potentially slow tag probing finishes, then enrich artist/album details in place. The Music page reports the current phase, discovered files and completed tag reads. Unreadable subfolders are skipped; empty or unreadable roots produce a visible message. A failed inaccessible-root scan preserves the previous index.
+
+As an administrator, open **Settings → Media folders → Whole-library OMDb metadata** and choose **Pull metadata for the whole library**. An OMDb key and an indexed movie/TV library are required. Existing OMDb titles are skipped unless **Refresh previously matched titles** is checked. Existing local metadata is preserved unless **Replace existing title details** is checked. Known IMDb IDs are reused; other titles require one unique exact title/format/year match from search. Ambiguous titles are listed for manual review. Requests are paced and cached; key/quota/network errors stop the job. Cancel stops before the next title. A single library rescan runs after changed metadata is saved. Progress is held in server memory and resets on restart. Jobs are limited to 5,000 indexed titles.
+
+Seventeen focused tests pass, including songs appearing during blocked tag probes, whole-library matching and provider quota handling. This does not verify the mount path or service permissions on your server; inspect the Music scan message for those errors.
