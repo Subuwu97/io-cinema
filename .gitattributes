@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.wasm binary
+*.mp4 binary
+public/vendor/tiptap.js -whitespace

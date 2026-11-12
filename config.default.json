@@ -1,0 +1,42 @@
+{
+  "siteName": "I/O Cinema",
+  "port": 5922,
+  "malClientId": "",
+  "jellyfinServerUrl": "",
+  "jellyfinApiKey": "",
+  "preferEnglishTitles": true,
+  "hardwareAcceleration": true,
+  "maxStreamCacheGB": 15,
+  "theme": {
+    "accent": "#ff7767",
+    "accent2": "#ff7767",
+    "background": "#080808"
+  },
+  "mediaPaths": {
+    "anime": "./media/tv",
+    "movies": "./media/movies",
+    "manga": "./media/disabled-books"
+  },
+  "videoExtensions": [
+    ".mp4",
+    ".mkv",
+    ".webm",
+    ".mov",
+    ".avi"
+  ],
+  "imageExtensions": [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp"
+  ],
+  "https": {
+    "certPath": "",
+    "keyPath": ""
+  },
+  "libraryScanTimeoutSec": 240,
+  "metadataSource": "local",
+  "allowSelfRegistration": true,
+  "requireApprovalForSelfRegistration": true,
+  "mediaScope": "video"
+}
