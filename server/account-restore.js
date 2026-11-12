@@ -8,7 +8,7 @@ function buildRestorePlan(data, sourceId, target, account, library, mode) {
     !["merge", "replace-conflicts"].includes(mode) ||
     JSON.stringify(data).length > 5 * 1024 * 1024
   )
-    throw Error("Choose a supported I/O account export and source profile");
+    throw Error("Choose a supported Mythic Reverie account export and source profile");
   const plan = {
     targetId: target.id,
     mode,

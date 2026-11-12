@@ -3062,7 +3062,7 @@ async function pageSettings(root) {
         <div class="field">
           <label>Accent Color</label>
           <div class="color-grid">
-            ${[['#ff7767','I/O Coral'],['#8b30f0','Purple'],['#e11d48','Rose'],['#0891b2','Cyan'],['#16a34a','Green'],['#ea580c','Orange'],['#4f46e5','Indigo'],['#db2777','Pink']].map(([c,name]) => `<button type="button" class="color-swatch ${c === String(Store.config.theme.accent).toLowerCase() ? 'selected' : ''}" data-color="${c}" title="${name} (${c.toUpperCase()})" aria-label="${name} (${c.toUpperCase()})" aria-pressed="${c === String(Store.config.theme.accent).toLowerCase()}" style="background:${c}"></button>`).join('')}
+            ${[['#c6a16c','Reverie Gold'],['#8b30f0','Purple'],['#e11d48','Rose'],['#0891b2','Cyan'],['#16a34a','Green'],['#ea580c','Orange'],['#4f46e5','Indigo'],['#db2777','Pink']].map(([c,name]) => `<button type="button" class="color-swatch ${c === String(Store.config.theme.accent).toLowerCase() ? 'selected' : ''}" data-color="${c}" title="${name} (${c.toUpperCase()})" aria-label="${name} (${c.toUpperCase()})" aria-pressed="${c === String(Store.config.theme.accent).toLowerCase()}" style="background:${c}"></button>`).join('')}
           </div>
         </div>
         <div class="field">
@@ -3363,7 +3363,7 @@ async function pageSettings(root) {
   });
 
   document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-    const siteName = document.getElementById('siteNameInput').value.trim() || 'I/O';
+    const siteName = document.getElementById('siteNameInput').value.trim() || 'Mythic Reverie';
     const malClientId = document.getElementById('malClientIdInput').value.trim();
     const jellyfinServerUrl = document.getElementById('jellyfinServerUrlInput').value.trim();
     const jellyfinApiKey = document.getElementById('jellyfinApiKeyInput').value.trim();
@@ -3841,9 +3841,9 @@ async function pageAuthGate(root) {
 
   root.innerHTML = `
   <div class="login-page io-login">
-<header class="io-login-header"><img src="/img/io-logo.svg" alt="I/O"/><span>Every story, your way.</span></header>
-<div class="login-card"><div class="io-login-art" role="img" aria-label="I/O mascot with anime and manga"></div><div class="login-form-area">
-<img class="io-form-logo" src="/img/io-logo.svg" alt="I/O"/><h1>Welcome to I/O</h1><p class="io-tagline">Every story, your way.</p><p class="io-login-description">Watch movies. Discover TV shows.</p>
+<header class="io-login-header"><img src="/img/io-logo.svg" alt="Mythic Reverie"/><span>Every world. Every story. Every sound.</span></header>
+<div class="login-card"><div class="io-login-art" role="img" aria-label="Mythic Reverie fantasy town and rabbit-eared character"></div><div class="login-form-area">
+<img class="io-form-logo" src="/img/io-logo.svg" alt="Mythic Reverie"/><h1>Welcome to Mythic Reverie</h1><p class="io-tagline">Every world. Every story. Every sound.</p><p class="io-login-description">Watch movies. Discover TV shows.</p>
         ${isFirstRun ? `
           <h2 class="login-heading">Create the admin account</h2>
           <p class="auth-subtitle">This first account manages the media library and can add accounts for everyone else in your household.</p>

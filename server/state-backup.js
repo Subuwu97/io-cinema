@@ -208,7 +208,7 @@ function restoreState(directory, backup) {
           .map((r) => r.name),
       );
       if (!tables.has("accounts") || !tables.has("profiles"))
-        throw Error("This is not an I/O account database");
+        throw Error("This is not an Mythic Reverie account database");
       db.exec("PRAGMA foreign_keys=ON");
       for (const table of [
         "sessions",

@@ -1,5 +1,5 @@
 {
-  "siteName": "I/O Cinema",
+  "siteName": "Mythic Reverie",
   "port": 5922,
   "malClientId": "",
   "jellyfinServerUrl": "",
@@ -8,9 +8,9 @@
   "hardwareAcceleration": true,
   "maxStreamCacheGB": 15,
   "theme": {
-    "accent": "#ff7767",
-    "accent2": "#ff7767",
-    "background": "#080808"
+    "accent": "#c6a16c",
+    "accent2": "#a86973",
+    "background": "#171210"
   },
   "mediaPaths": {
     "anime": "./media/tv",

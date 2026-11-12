@@ -1,4 +1,4 @@
-# I/O Cinema
+# Mythic Reverie
 
 A separate self-hosted movies, TV-show and music application based on [I/O](https://github.com/Subuwu97/io), originally based on Minami. This repository is independent of I/O.
 
@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.2.2, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.3.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -73,3 +73,11 @@ Music scans now publish filename-based playable entries before potentially slow 
 As an administrator, open **Settings → Media folders → Whole-library OMDb metadata** and choose **Pull metadata for the whole library**. An OMDb key and an indexed movie/TV library are required. Existing OMDb titles are skipped unless **Refresh previously matched titles** is checked. Existing local metadata is preserved unless **Replace existing title details** is checked. Known IMDb IDs are reused; other titles require one unique exact title/format/year match from search. Ambiguous titles are listed for manual review. Requests are paced and cached; key/quota/network errors stop the job. Cancel stops before the next title. A single library rescan runs after changed metadata is saved. Progress is held in server memory and resets on restart. Jobs are limited to 5,000 indexed titles.
 
 Seventeen focused tests pass, including songs appearing during blocked tag probes, whole-library matching and provider quota handling. This does not verify the mount path or service permissions on your server; inspect the Music scan message for those errors.
+
+## Mythic Reverie branding (0.3.0)
+
+The application is now **Mythic Reverie**: movies, TV and music in one private library. The supplied fantasy-town character photo is used unchanged on sign-in; a moon/play emblem and wordmark use espresso, parchment, muted gold and burgundy. See [the brand reference](docs/MYTHIC-REVERIE-BRAND.md).
+
+Upgrades migrate only the old default site name and original default coral colours. Customized names/themes remain, and the migration runs only once. Existing `cinema-data`, `IO_CINEMA_DATA_DIR`, authentication cookies, port 5922, libraries and OMDb keys are preserved. `MYTHIC_REVERIE_DATA_DIR` is an optional new alias; changing it points to a different data directory, so do not set it unless intentionally relocating the existing data. The GitHub repository URL remains unchanged so existing installations can update normally. Original I/O/Minami attribution remains.
+
+Music album artwork now has an explicit Play control; album titles open and scroll to their track list. Selecting a song displays Now Playing immediately, with an opening-track message while the browser loads the source. Existing FLAC playback was observed on the running Cinema instance, with the playback clock advancing. This confirms that sample playback, not every library file or codec.

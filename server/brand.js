@@ -1,0 +1,3 @@
+const DEFAULTS={siteName:'Mythic Reverie',accent:'#c6a16c',accent2:'#a86973',background:'#171210'};
+function migrateBrand(config){let changed=false;if(!config._mythicReverieBrand){if(['I/O Cinema','I/O'].includes(config.siteName)){config.siteName=DEFAULTS.siteName;changed=true;}const theme=config.theme||{};for(const field of ['accent','accent2'])if(String(theme[field]||'').toLowerCase()==='#ff7767'){theme[field]=DEFAULTS[field];changed=true;}if(theme.background==='#080808'){theme.background=DEFAULTS.background;changed=true;}config.theme=theme;config._mythicReverieBrand=true;changed=true;}return changed;}
+module.exports={DEFAULTS,migrateBrand};

@@ -290,7 +290,7 @@ class Library {
     this.cache.movies = moviesResult.items;
     if (moviesResult.ok) this._flatShowIds = new Set(moviesResult.flatShowIds);
     const mangaResult = this.config.mediaScope==='video' ? {items:[],chapterIndex:{}} : await timed('manga','Manga folder',this.cache.manga||[]);
-    if(this.config.mediaScope==='video')this.scanStatus.manga={state:'ready',message:'Books are disabled in I/O Cinema'};
+    if(this.config.mediaScope==='video')this.scanStatus.manga={state:'ready',message:'Books are disabled in Mythic Reverie'};
     this.cache.manga = mangaResult.items;
     if (mangaResult.chapterIndex) this._chapterIndex = mangaResult.chapterIndex;
     this.cache.scannedAt = Math.max(Date.now(), this.cache.scannedAt + 1);

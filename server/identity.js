@@ -53,7 +53,7 @@ function registerIdentity(app,{db,accounts,services,requireAuth,setSessionCookie
     const existing=db.prepare('SELECT account_id FROM account_email WHERE email=?').get(address);
     if(existing&&existing.account_id!==account.id)return res.status(400).json({error:'This address is already linked to another account'});
     const token=issue('verify',account.id,{email:address});
-    try{await services.send(address,'Verify your I/O email',`Confirm this email address for your I/O account:\n\n${services.get().publicUrl}/#/verify-email/${token}\n\nThis link expires in 30 minutes. If you did not request this, ignore this message.`);}
+    try{await services.send(address,'Verify your I/O email',`Confirm this email address for your Mythic Reverie account:\n\n${services.get().publicUrl}/#/verify-email/${token}\n\nThis link expires in 30 minutes. If you did not request this, ignore this message.`);}
     catch{db.prepare('DELETE FROM identity_tokens WHERE hash=?').run(digest(token));return res.status(502).json({error:'Verification email could not be sent. Ask the administrator to check email delivery.'});}
     res.status(202).json({message:'Check your email for a verification link.'});
   }));
@@ -84,7 +84,7 @@ function registerIdentity(app,{db,accounts,services,requireAuth,setSessionCookie
     limit('recover-address:'+digest(address),3);
     const match=db.prepare('SELECT account_id FROM account_email WHERE email=?').get(address);
     if(match){const token=issue('reset',match.account_id);
-      try{await services.send(address,'Reset your I/O password',`Reset your I/O password:\n\n${services.get().publicUrl}/#/reset-password/${token}\n\nThis link expires in 30 minutes. Two-factor authentication remains enabled. If you did not request this, ignore this message.`);}
+      try{await services.send(address,'Reset your Mythic Reverie password',`Reset your Mythic Reverie password:\n\n${services.get().publicUrl}/#/reset-password/${token}\n\nThis link expires in 30 minutes. Two-factor authentication remains enabled. If you did not request this, ignore this message.`);}
       catch{db.prepare('DELETE FROM identity_tokens WHERE hash=?').run(digest(token));/* The public response never identifies a registered address. */}}
     res.status(202).json({message:'If this verified address is registered, a reset link will be sent.'});
   }));
@@ -143,19 +143,19 @@ function registerIdentity(app,{db,accounts,services,requireAuth,setSessionCookie
       if(row.payload.link){
         const local=db.prepare('SELECT password_hash FROM accounts WHERE id=?').get(row.account_id);
         if(!local||local.password_hash!==row.credential_hash)return fail('Your password changed. Confirm the connection again in Settings.');
-        if(external&&external.account_id!==row.account_id)return fail('This Discord account is already connected to another I/O account.');
-        if(db.prepare("SELECT 1 FROM account_external WHERE account_id=? AND provider='discord'").get(row.account_id)&&!external)return fail('This I/O account already has a Discord connection.');
+        if(external&&external.account_id!==row.account_id)return fail('This Discord account is already connected to another Mythic Reverie account.');
+        if(db.prepare("SELECT 1 FROM account_external WHERE account_id=? AND provider='discord'").get(row.account_id)&&!external)return fail('This Mythic Reverie account already has a Discord connection.');
         db.prepare("INSERT INTO account_external VALUES (?,'discord',?,?) ON CONFLICT(provider,subject) DO UPDATE SET display_name=excluded.display_name").run(row.account_id,user.id,String(user.global_name||user.username||'Discord').slice(0,100));
         putCookie(res,'io_discord_state','',0);return res.redirect('/#/account-security');
       }
       if(!accountId){
         if(!accounts.accountCount())return fail('Create the first administrator account locally before using Discord.');
-        const policy=getConfig();if(!policy.allowSelfRegistration)return fail('Ask an administrator to create your I/O account, then connect Discord in Settings.');
+        const policy=getConfig();if(!policy.allowSelfRegistration)return fail('Ask an administrator to create your Mythic Reverie account, then connect Discord in Settings.');
         const account=await accounts.createAccount({username:'discord_'+user.id,password:crypto.randomBytes(48).toString('hex'),role:'user',adultContentAllowed:false,registrationPolicy:{admin:false,allow:!!policy.allowSelfRegistration,approval:!!policy.requireApprovalForSelfRegistration}});accountId=account.id;
         db.prepare("INSERT INTO account_external VALUES (?,'discord',?,?)").run(accountId,user.id,String(user.global_name||user.username||'Discord').slice(0,100));
         if(user.verified&&user.email){try{const address=email(user.email);if(!db.prepare('SELECT 1 FROM account_email WHERE email=?').get(address))db.prepare('INSERT INTO account_email VALUES (?,?,?)').run(accountId,address,new Date(now()).toISOString());}catch{}}
       }
-      const account=db.prepare('SELECT * FROM accounts WHERE id=?').get(accountId);if(!account?.approved)return fail('Your I/O account is waiting for administrator approval.');
+      const account=db.prepare('SELECT * FROM accounts WHERE id=?').get(accountId);if(!account?.approved)return fail('Your Mythic Reverie account is waiting for administrator approval.');
       if(account.totp_enabled){const challenge=issue('oauth-2fa',account.id,{},300000);putCookie(res,'io_discord_state','',0);putCookie(res,'io_discord_challenge',challenge,300);return res.redirect('/#/discord-2fa/'+challenge);}
       setSessionCookie(res,accounts.createSession(accountId,req.headers['user-agent']));putCookie(res,'io_discord_state','',0);res.redirect('/#/');
     }catch{return fail('Discord sign-in could not be completed. Please try again.');}

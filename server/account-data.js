@@ -167,7 +167,7 @@ function registerAccountData(
         throw Error("This export is too large for email; download it instead");
       await services.send(
         address,
-        "Your I/O account export",
+        "Your Mythic Reverie account export",
         "Your requested account export is attached. Keep this archive private. It excludes credentials and sessions.",
         [
           {
@@ -197,7 +197,7 @@ function registerAccountData(
           {
             "I-O-account.json": strToU8(JSON.stringify(data, null, 2)),
             "README.txt": strToU8(
-              "Your I/O account data. Keep this archive private. Credentials and sessions are excluded. This is a personal export, not a server restore backup.",
+              "Your Mythic Reverie account data. Keep this archive private. Credentials and sessions are excluded. This is a personal export, not a server restore backup.",
             ),
           },
           { level: 6 },

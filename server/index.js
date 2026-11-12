@@ -69,7 +69,7 @@ const BUILTIN_AVATARS_DIR = path.join(BASE_DIR, 'public', 'img', 'avatars');
 // way. Used both for the startup banner and the JS/CSS cache-busting
 // query param below, so they can never drift out of sync with each
 // other.
-const BUILD_VERSION = 'io-cinema-0.2.2-scan-progress-bulk-omdb';
+const BUILD_VERSION = 'mythic-reverie-0.3.0';
 const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 const SESSION_COOKIE = 'io_cinema_session';
 const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 days
@@ -112,7 +112,7 @@ function loadConfig() {
   // Backfill keys added in later versions for configs created by an older
   // build, so they show up as real, editable entries in the file (and in
   // Settings) instead of silently relying on an in-memory fallback.
-  let changed = false;
+  let changed = require('./brand').migrateBrand(cfg);
   cfg.mediaScope='video';
   if (!cfg.mediaPaths) { cfg.mediaPaths = {}; changed = true; }
   if (!cfg.mediaPaths.movies) { cfg.mediaPaths.movies = './media/movies'; changed = true; }

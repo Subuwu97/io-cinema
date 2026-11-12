@@ -1,7 +1,7 @@
 {
-  "name": "io-cinema",
-  "version": "0.2.2",
-  "description": "I/O Cinema \u2014 self-hosted movies, TV shows and music, based on I/O and Minami.",
+  "name": "mythic-reverie",
+  "version": "0.3.0",
+  "description": "Mythic Reverie \u2014 your private world of movies, TV and music. Based on I/O and Minami.",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
