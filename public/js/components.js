@@ -11,6 +11,7 @@ function renderNavbar(activeRoute) {
         <li><a href="#/" class="${activeRoute === 'home' ? 'active' : ''}">Home</a></li>
         <li><a href="#/series" class="${activeRoute === 'series' ? 'active' : ''}">TV Shows</a></li>
         <li><a href="#/movies" class="${activeRoute === 'movies' ? 'active' : ''}">Movies</a></li>
+        <li><a href="#/music" class="${activeRoute === 'music' ? 'active' : ''}">Music</a></li>
         <li><a href="#/new" class="${activeRoute === 'new' ? 'active' : ''}">New &amp; Popular</a></li>
         <li><a href="#/genres" class="${activeRoute === 'genres' ? 'active' : ''}">Genres</a></li>
         <li><a href="#/calendar" class="${activeRoute === 'calendar' ? 'active' : ''}">Calendar</a></li>

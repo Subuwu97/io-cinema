@@ -1,6 +1,6 @@
 # I/O Cinema
 
-A separate self-hosted movies and TV-show application based on [I/O](https://github.com/Subuwu97/io), originally based on Minami. This repository is independent of I/O.
+A separate self-hosted movies, TV-show and music application based on [I/O](https://github.com/Subuwu97/io), originally based on Minami. This repository is independent of I/O.
 
 ## Run with Node.js
 
@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.1.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.2.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -45,3 +45,13 @@ Derived from Subuwu97/io commit 8ed9c7f, using its declared MIT license; I/O is 
 The Cinema-specific scope/isolation checks and subtitle tests pass (7 tests), and all server/client JavaScript syntax checks pass. The server starts and scans the separate empty TV/movie roots. The full inherited suite is not verified in this restricted session: 37 tests pass and 46 fail because local HTTP connections are denied. A browser preview also times out. These connection-dependent checks need rerunning in a normal environment before deployment.
 
 Player dependencies are generated from the pinned npm packages when `npm start` runs. Keep development dependencies installed for this build step. Cinema uses the I/O vector logo and generic SVG profile icons; anime-specific raster artwork is not included in this edition.
+
+## Music library
+
+Open **Music** in the top navigation, then expand **Music library settings** as an administrator. Enter an absolute folder path on the machine running Cinema, such as `/mnt/music` or `D:/Music`, and choose **Save folder and scan**. This does not upload or change your music files. Folder settings stay private in `cinema-data/music-settings.json`. Only signed-in accounts can browse or play music. The music collection is shared between Cinema accounts.
+
+MP3, M4A, AAC, FLAC, WAV, Ogg, Opus and audio WebM files are indexed. Playback depends on the browser's native codec support; unsupported formats show an error rather than silently transcoding. FFprobe reads title/artist/album/disc/track metadata and duration; filenames/folders are the fallback. Artwork comes from cover.jpg, folder.jpg, cover.png, folder.png or cover.webp, then embedded audio artwork via FFmpeg.
+
+The listening room includes album/artist search, album tracks, Now Playing, a persistent mini-player, queue, previous/next, shuffle, repeat all/one, seeking, volume, media-key integration and keyboard shortcuts (Space and Left/Right). Music pauses when video starts, and stops on account/profile changes. There are no saved playlists or lyrics yet.
+
+Scans ignore symlinks, stay within the selected root, cap traversal at 20,000 tracks/24 folder levels, and reuse unchanged tag metadata in memory. Use **Rescan library** after adding music. Ten focused tests pass, including a real tagged MP3 with embedded artwork. The UI and full HTTP range playback still need verification with a running instance and real music library; local network restrictions prevented that check in this session.

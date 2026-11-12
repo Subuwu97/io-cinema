@@ -1,7 +1,7 @@
 function ioFooterHTML() {
   const profile = Store.activeProfile;
-  return `<footer class="io-footer"><div><img src="/img/io-logo.svg" alt="I/O"/><p>Your home for movies and TV shows.<br/>Every story, your way.</p></div>
-    <div><h4>Browse</h4><a href="#/">Home</a><a href="#/series">TV Shows</a><a href="#/movies">Movies</a><a href="#/genres">Categories</a></div>
+  return `<footer class="io-footer"><div><img src="/img/io-logo.svg" alt="I/O"/><p>Your home for movies, TV shows, and music.<br/>Every story, your way.</p></div>
+    <div><h4>Browse</h4><a href="#/">Home</a><a href="#/series">TV Shows</a><a href="#/movies">Movies</a><a href="#/genres">Categories</a><a href="#/music">Music</a></div>
     <div><h4>My stuff</h4><a href="#/account/${profile ? profile.id : ''}">My List</a><a href="#/history">Watch History</a><a href="#/search">Search</a><a href="#/settings">Settings</a></div>
     <div class="io-footer-credit">I/O Cinema · Based on I/O and Minami · Your own media, on your own server.</div></footer>`;
 }

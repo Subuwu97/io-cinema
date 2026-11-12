@@ -37,6 +37,7 @@ async function renderApp() {
 
   // Outermost gate: no signed-in account -> show login / first-run setup.
   if (!Store.account) {
+    window.CinemaMusic?.stop();
     appRoot.innerHTML = '';
     await pageAuthGate(appRoot);
     return;
@@ -45,11 +46,13 @@ async function renderApp() {
   // Next gate: signed in, but no profile selected yet -> "who's watching".
   const gateExempt = ['switch-profile', 'manage-profiles'];
   if (!Store.activeProfile && !gateExempt.includes(parts[0])) {
+    window.CinemaMusic?.stop();
     appRoot.innerHTML = renderGate();
     wireGate(appRoot, () => { location.hash = '#/'; renderApp(); });
     return;
   }
 
+  if (window.CinemaMusic) CinemaMusic.routeChanged(parts);
   window.scrollTo(0, 0);
 
   try {
@@ -58,6 +61,8 @@ async function renderApp() {
     if(location.hash!==experienceRoute)return;
     if (parts.length === 0) {
       await pageHome(appRoot);
+    } else if (parts[0] === 'music') {
+      await CinemaMusic.page(appRoot);
     } else if (parts[0] === 'live') {
       await ioPageLive(appRoot, parts[1]);
     } else if (parts[0] === 'live-manage') {
