@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.2.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.2.1, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -55,3 +55,13 @@ MP3, M4A, AAC, FLAC, WAV, Ogg, Opus and audio WebM files are indexed. Playback d
 The listening room includes album/artist search, album tracks, Now Playing, a persistent mini-player, queue, previous/next, shuffle, repeat all/one, seeking, volume, media-key integration and keyboard shortcuts (Space and Left/Right). Music pauses when video starts, and stops on account/profile changes. There are no saved playlists or lyrics yet.
 
 Scans ignore symlinks, stay within the selected root, cap traversal at 20,000 tracks/24 folder levels, and reuse unchanged tag metadata in memory. Use **Rescan library** after adding music. Ten focused tests pass, including a real tagged MP3 with embedded artwork. The UI and full HTTP range playback still need verification with a running instance and real music library; local network restrictions prevented that check in this session.
+
+## OMDb movie and TV metadata
+
+As an administrator, open **Settings → Media folders → OMDb movie & TV metadata**, paste your own OMDb key and click **Save OMDb key**. Alternatively set `OMDB_API_KEY` on the server. The saved key is encrypted with the existing integration-secret store, is never returned to the browser, and is excluded from Git. Do not send API keys in chat.
+
+Open a movie or TV-series page and choose **Import from OMDb**. Search by title or IMDb ID, review the matching format, and import. Defaults fill missing details and preserve existing local metadata, skip points and artwork. Select **Replace existing title details** to replace title/plot/year/rating/genres. Existing `info.json` is backed up as `info.before-omdb.json` before saving. Posters download only when no cover exists, through a restricted HTTPS image fetch. Displayed title details include runtime, IMDb score, director and cast, with OMDb attribution.
+
+This uses OMDb's title/search API for movie and series records; it does not automatically match the whole library or replace episode filenames. Your own valid OMDb key and plan limits apply. See https://www.omdbapi.com/ for API details and content terms.
+
+Music folder configuration is now expanded at the top of the Music page and also appears in **Settings → Media folders → Music directory**. This is an administrator-only server setting; ordinary accounts can browse and play music but cannot change the shared root. Thirteen focused tests pass, including OMDb request caching, private-key handling, metadata preservation and poster validation. Live OMDb requests still require your own key.

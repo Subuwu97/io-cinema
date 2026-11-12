@@ -565,6 +565,7 @@ async function pageDetail(root, id) {
             <span>${show.episodeCount} episodes</span>
             ${(show.studios || []).map((s) => `<a href="#/studio/${encodeURIComponent(s)}" class="detail-studio-link">${escapeHtml(s)}</a>`).join('')}
           </div>
+          ${show.omdb ? `<p class="detail-meta">${escapeHtml([show.omdb.runtime,show.omdb.imdbRating ? 'IMDb '+show.omdb.imdbRating+'/10' : ''].filter(Boolean).join(' · '))}</p><p class="cm-muted">${show.omdb.director ? 'Director: '+escapeHtml(show.omdb.director)+'<br>' : ''}${show.omdb.actors ? 'Cast: '+escapeHtml(show.omdb.actors)+'<br>' : ''}Metadata: <a href="https://www.omdbapi.com/" target="_blank" rel="noopener">OMDb</a>${/^tt\d{7,10}$/.test(show.imdbId||'') ? ` · <a href="https://www.imdb.com/title/${encodeURIComponent(show.imdbId)}/" target="_blank" rel="noopener">IMDb</a>` : ''}</p>` : ''}
           <div class="detail-genres">${(show.genres || []).map(g => `<span class="chip">${escapeHtml(g)}</span>`).join('')}</div>
           <p class="detail-desc">${escapeHtml(show.description || 'No description yet. Add an info.json file to this folder to customize title info.')}</p>
           <div class="detail-actions">
@@ -572,7 +573,7 @@ async function pageDetail(root, id) {
             <button class="btn btn-secondary" id="listBtn">${inList ? '&#10003; In My List' : '+ My List'}</button>
             <button class="btn-ghost" id="topPickBtn">${Store.isTopPick(show.id, 'anime') ? '&#9733; Top Pick' : '&#9734; Top Pick'}</button>
             <button class="btn-ghost" id="reviewBtn">&#128221; Write a Review</button>
-            ${Store.account && Store.account.role === 'admin' ? `<button class="btn-ghost" id="malImportBtn" title="Pull poster, banner, description and genres from MyAnimeList">&#128218; Import from MAL</button>` : ''}
+            ${Store.account && Store.account.role === 'admin' ? `<button class="btn-ghost" id="malImportBtn" title="Find movie or TV metadata in OMDb">Import from OMDb</button>` : ''}
           </div>
         </div>
       </div>
@@ -639,14 +640,7 @@ async function pageDetail(root, id) {
     openReviewModal(show, 'anime');
   });
   const malImportBtn = document.getElementById('malImportBtn');
-  if (malImportBtn) {
-    malImportBtn.addEventListener('click', () => {
-      openMalSearchModal(show, async () => {
-        await Store.loadLibrary({ force: true });
-        await pageDetail(root, id);
-      });
-    });
-  }
+  if (malImportBtn) malImportBtn.addEventListener('click',()=>CinemaOMDb.match(show));
 
   function isEpisodeWatched(relPath) {
     return !!(Store.activeProfile && Store.activeProfile.watchedEpisodes && Store.activeProfile.watchedEpisodes.includes(`${show.id}:${relPath}`));
@@ -3093,11 +3087,11 @@ async function pageSettings(root) {
           </div>
         </div>
         <div class="field">
-          <label>Automatic Enrichment Source</label>
-          <select id="metadataSourceInput"><option value="local" selected>Local movie/TV metadata</option>
+          <label>Metadata storage</label>
+          <select id="metadataSourceInput"><option value="local" selected>Local files with optional OMDb imports</option>
           </select>
           <div style="font-size:12px;color:var(--text-faint);margin-top:6px">
-            Cinema reads artwork and info.json from your movie and TV folders. Automatic online matching is not configured.
+            Cinema reads local info.json files. Configure OMDb below, then review and import matches from each title page.
           </div>
         </div>
         <div class="field" style="display:flex;align-items:center;gap:10px">
@@ -3166,6 +3160,7 @@ async function pageSettings(root) {
           </p>
           <div class="field"><label>TV shows folder</label><input type="text" id="pathAnimeInput" value="${escapeHtml(Store.config.mediaPaths.anime || './media/anime')}"/></div>
           <div class="field"><label>Movies folder</label><input type="text" id="pathMoviesInput" value="${escapeHtml(Store.config.mediaPaths.movies || './media/movies')}"/></div>
+          <section id="cinemaLibrarySettings"></section>
           <div class="field" hidden><label>Disabled books folder</label><input type="text" id="pathMangaInput" value="${escapeHtml(Store.config.mediaPaths.manga || './media/manga')}"/></div>
         </div>
         <div style="margin-top:20px">
@@ -3174,6 +3169,7 @@ async function pageSettings(root) {
       </div>` : ''}
     </div>`;
   wireNavbar();
+  if(isAdmin) CinemaOMDb.settings(document.getElementById('cinemaLibrarySettings'));
 
   document.getElementById('passwordForm').addEventListener('submit', async (e) => {
     e.preventDefault();

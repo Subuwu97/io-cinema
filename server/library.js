@@ -371,6 +371,8 @@ class Library {
         cover: withCacheBust(cover ? `/media-asset/${assetFolder}/${slugify(showName)}/${path.basename(cover)}` : null, cover),
         banner: withCacheBust(banner ? `/media-asset/${assetFolder}/${slugify(showName)}/${path.basename(banner)}` : null, banner),
         theme: withCacheBust(theme ? `/media-asset/${assetFolder}/${slugify(showName)}/${path.basename(theme)}` : null, theme),
+        imdbId: info.imdbId || null,
+        omdb: info.omdb || null,
         malId: info.malId || null,
         anilistId: info.anilistId || null,
         groups,

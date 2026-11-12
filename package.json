@@ -1,6 +1,6 @@
 {
   "name": "io-cinema",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "I/O Cinema \u2014 self-hosted movies, TV shows and music, based on I/O and Minami.",
   "main": "server/index.js",
   "scripts": {

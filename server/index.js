@@ -69,7 +69,7 @@ const BUILTIN_AVATARS_DIR = path.join(BASE_DIR, 'public', 'img', 'avatars');
 // way. Used both for the startup banner and the JS/CSS cache-busting
 // query param below, so they can never drift out of sync with each
 // other.
-const BUILD_VERSION = 'io-cinema-0.2.0-music';
+const BUILD_VERSION = 'io-cinema-0.2.1-music-settings-omdb';
 const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 const SESSION_COOKIE = 'io_cinema_session';
 const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 days
@@ -482,6 +482,7 @@ require('./novels').registerNovels(app, { db, requireAuth, getLibrary:()=>librar
 require('./discovery-plus').registerDiscoveryPlus(app, { db, requireAuth, getLibrary: () => library, publicOrigin: () => services.get().publicUrl });
 nativeTV=require('./tv-native').registerNativeTV(app,{db,requireAuth,profiles:profilesStore,getLibrary:()=>library,startHls:resolveAndStartHlsSession,getMediaInfo:async(id,episode)=>{const file=library.resolveEpisodeFile(id,episode);if(!file)throw Error('Episode not found');return getStreamInfo(file);},getSubtitle:async(id,episode,track,shift)=>{const file=library.resolveEpisodeFile(id,episode);if(!file)throw Error('Episode not found');const text=sanitizeVttText(await getCachedSubtitle(file,track));return shift>0?shiftVttTimestamps(text,shift):text;},publicOrigin:()=>services.get().publicUrl});
 const integrationSecrets = require('./private-settings').createPrivateSettings(DATA_DIR);
+require('./omdb').registerOMDb(app,{requireAdmin,secrets:integrationSecrets,getLibrary:()=>library,rescan:()=>scanLibrary(true),publicOrigin:()=>services.get().publicUrl});
 casting=require('./casting').registerCasting(app,{requireAuth,getAccountFromRequest,profiles:profilesStore,getLibrary:()=>library,startHls:resolveAndStartHlsSession,publicOrigin:()=>services.get().publicUrl});
 require('./trackers').registerTrackers(app, { db, requireAuth, accounts: accountsStore, services, secrets: integrationSecrets, getLibrary: () => library });
 const notificationDelivery = require('./notification-delivery').registerNotificationDelivery(app, { db, requireAuth, services, secrets: integrationSecrets, notifications, getLibrary: () => library });
