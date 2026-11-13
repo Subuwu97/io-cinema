@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.3.3, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.3.4, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -106,6 +106,9 @@ Twenty-eight focused tests pass, including matching, caching, retry cooldown, op
 
 Now Playing and the fullscreen listening room have a flowing, album-inspired colour background. A tiny in-browser sample of same-origin album artwork selects three distinct colours; neutral, missing or unreadable covers use the Mythic Reverie palette. The full player adds a subtle floating/breathing artwork effect. The motion runs only during playback and freezes when paused.
 
-Use **Ambient effects** to turn it off; that preference is saved in the browser for each account/profile. Device `prefers-reduced-motion` is respected automatically, leaving a static colour wash. The decorative layers are ignored by assistive technology and do not block controls or lyrics. Palette sampling is cached and stale artwork loads cannot recolour a newer track.
+Use the **Visual** selector to turn it off; that preference is saved in the browser for each account/profile. Device `prefers-reduced-motion` is respected automatically, leaving a static colour wash. The decorative layers are ignored by assistive technology and do not block controls or lyrics. Palette sampling is cached and stale artwork loads cannot recolour a newer track.
 
 This is ambient visual motion, not a beat/frequency analyser. It does not request microphone access, create a Web Audio processing chain, change playback volume, or send artwork to an external service. Thirty focused tests pass, including colour extraction and safe fallback cases. Real-device animation and performance still need verification on your instance.
+
+### Listening room (0.3.4)
+Music has an album-led library and a cleaner fullscreen player. Choose Album colors, Earth (a stylized rotating orbital view), or Off in the Visual menu. Volume, lyric timing and local LRC files are in fullscreen player options. Visuals pause with playback and respect reduced motion; Earth is decorative, not a live satellite feed.
