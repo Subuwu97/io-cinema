@@ -994,6 +994,7 @@ async function pagePlayer(root, showId, relPathEncoded, options = {}) {
 
   const playerContainer = document.getElementById('playerContainer');
   const video = document.getElementById('mainVideo');
+  let movieIntroPending = !!window.MovieIntro?.eligible(showId, Store.movies, options.live);
   const measurements = new window.IOPlaybackMeasurements(video, () => video.currentSrc.startsWith('blob:') || video.currentSrc.includes('.m3u8') ? 'hls' : 'direct');
   window.addEventListener('hashchange', () => measurements.destroy(), { once: true });
   const savedProgress = Store.activeProfile && Store.activeProfile.progress && Store.activeProfile.progress[showId];
@@ -2335,7 +2336,7 @@ async function pagePlayer(root, showId, relPathEncoded, options = {}) {
   let autoMarkedWatched = false;
   let precacheFired = false;
   function saveProgress() {
-    if (options.live || !Store.activeProfile || reloading || !totalDuration()) return;
+    if (movieIntroPending || options.live || !Store.activeProfile || reloading || !totalDuration()) return;
     API.setProgress(Store.activeProfile.id, showId, relPath, absoluteTime(), totalDuration()).catch(() => {});
     // Halfway through, quietly ask the server to start preparing the
     // next episode's cached copy in the background, so "Next Episode"
@@ -2467,6 +2468,12 @@ async function pagePlayer(root, showId, relPathEncoded, options = {}) {
 
 
   if (selectedSubtitle != null) applySubtitle(selectedSubtitle);
+  if (movieIntroPending) {
+    const continueMovie = await MovieIntro.play(playerContainer, video);
+    if (!continueMovie) return;
+    movieIntroPending = false;
+  }
+  if (!video.isConnected) return;
   loadVideo(resumeAt, true);
   options.onReady?.({video, seekTo, absoluteTime, totalDuration});
 }

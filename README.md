@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.3.4, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.3.5, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -112,3 +112,6 @@ This is ambient visual motion, not a beat/frequency analyser. It does not reques
 
 ### Listening room (0.3.4)
 Music has an album-led library and a cleaner fullscreen player. Choose Album colors, Earth (a stylized rotating orbital view), or Off in the Visual menu. Volume, lyric timing and local LRC files are in fullscreen player options. Visuals pause with playback and respect reduced motion; Earth is decorative, not a live satellite feed.
+
+### Optional movie intro (0.3.5)
+Place your browser-compatible H.264/AAC `movie-intro.mp4` in the server data folder (`cinema-data` by default, or your configured MYTHIC_REVERIE_DATA_DIR/IO_CINEMA_DATA_DIR). Restart after updating the source. The authenticated web player plays it before each movie, including resumed movies, with Skip intro; TV, live video and music are excluded. Missing/failed intros fall through to the movie. Movie resume position and watch progress exclude the intro. Native clients and remote casting do not run this web-only intro. The clip is supplied separately and is not included in the public repository. It does not calibrate or improve audio.

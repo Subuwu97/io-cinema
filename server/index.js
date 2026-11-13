@@ -69,7 +69,7 @@ const BUILTIN_AVATARS_DIR = path.join(BASE_DIR, 'public', 'img', 'avatars');
 // way. Used both for the startup banner and the JS/CSS cache-busting
 // query param below, so they can never drift out of sync with each
 // other.
-const BUILD_VERSION = 'mythic-reverie-0.3.4-listening-room';
+const BUILD_VERSION = 'mythic-reverie-0.3.5-movie-intro';
 const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 const SESSION_COOKIE = 'io_cinema_session';
 const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 days
@@ -470,6 +470,7 @@ function requireAdmin(req, res) {
 const services = require('./services').createServices(DATA_DIR);
 require('./music').registerMusic(app,{requireAuth,requireAdmin,dataDir:DATA_DIR,publicOrigin:()=>services.get().publicUrl});
 require('./hero-entry').registerHeroEntry(app,{db,requireAuth,requireAdmin,publicOrigin:()=>services.get().publicUrl});
+require('./movie-intro').registerMovieIntro(app,{requireAuth,dataDir:DATA_DIR});
 require('./identity').registerIdentity(app, { db, accounts: accountsStore, services, requireAuth, setSessionCookie, getConfig: () => config });
 require('./live-tv').registerLive(app, { db, requireAuth, getLibrary: () => library, getStreamInfo });
 require('./library-actions').registerLibraryActions(app, { db, requireAuth, getLibrary: () => library, publicOrigin: () => services.get().publicUrl });
