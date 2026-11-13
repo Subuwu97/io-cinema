@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.3.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.3.2, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -81,3 +81,23 @@ The application is now **Mythic Reverie**: movies, TV and music in one private l
 Upgrades migrate only the old default site name and original default coral colours. Customized names/themes remain, and the migration runs only once. Existing `cinema-data`, `IO_CINEMA_DATA_DIR`, authentication cookies, port 5922, libraries and OMDb keys are preserved. `MYTHIC_REVERIE_DATA_DIR` is an optional new alias; changing it points to a different data directory, so do not set it unless intentionally relocating the existing data. The GitHub repository URL remains unchanged so existing installations can update normally. Original I/O/Minami attribution remains.
 
 Music album artwork now has an explicit Play control; album titles open and scroll to their track list. Selecting a song displays Now Playing immediately, with an opening-track message while the browser loads the source. Existing FLAC playback was observed on the running Cinema instance, with the playback clock advancing. This confirms that sample playback, not every library file or codec.
+
+## Fullscreen music and karaoke lyrics (0.3.1)
+
+On Music, choose **Fullscreen player** for the expanded listening room with artwork, seek, transport controls and volume. Browser fullscreen is requested when supported; otherwise the expanded view fills the page. Escape or Close returns to the library. **Karaoke lyrics** opens the synchronized lyrics panel, also available below Now Playing.
+
+Put a matching UTF-8 `.lrc` sidecar beside each song: `Song.flac` and `Song.lrc`. UTF-16LE files with a BOM are also supported on the server. Plain LRC highlights timed lines; enhanced LRC `<mm:ss.xx>` markers highlight words. Multiple line timestamps and Unicode text are supported. Adjust **Sync (seconds)** from -30 to +30 if needed; positive values delay the displayed line. Alternatively open an LRC file in the browser; it stays in that browser session and is not uploaded. Click a lyric line to seek.
+
+This is a sing-along view: it does not remove vocals or generate lyrics. Local lyrics work without a provider; version 0.3.2 adds optional LRCLIB lookups. Untimed plain text is not synchronized. LRC metadata tags are ignored; use the timing control for an offset. Lyrics files are capped at 512 KB/5,000 parsed lines. Lyrics requests require sign-in and stay within the selected music directory. Twenty-three focused tests pass. Browser/device fullscreen and live lyric synchronization still need real-device verification.
+
+## Automatic fullscreen and synced lyrics (0.3.2)
+
+Music now opens the fullscreen player when you click Play, including album-art Play and resume controls. **Fullscreen on play** is enabled by default and can be disabled; the preference stays in the browser for the selected account/profile. Native fullscreen depends on browser permission and an active user gesture. If unavailable, the expanded listening view is used. Auto-advancing does not force fullscreen back on after you exit it.
+
+To find synchronized lyrics automatically, an administrator must enable **Automatic synced lyrics from LRCLIB** in **Music library settings** or **Settings → Media folders**. This opt-in sends track title, artist, album and duration to https://lrclib.net; audio files and filesystem paths are never sent. There is no API key requirement for anonymous lookups. Local `.lrc` files and session-opened LRC files take priority.
+
+Lookups use LRCLIB's signature endpoint, validate the returned artist/title and recording duration, cache matches privately under `cinema-data/lyrics-cache`, pace requests, and honor Retry-After on provider throttling. Missing or untimed lyrics are reported, not guessed or given invented timestamps. Instrumental recordings and different live/remastered versions may not have matching synced lyrics. Word highlighting still requires word-timed enhanced LRC; provider line-timed LRC highlights lines. The timing control remains available for a manual correction. Lyrics open automatically when a timed match is found.
+
+Provider documentation: https://lrclib.net/docs.txt
+
+Twenty-eight focused tests pass, including matching, caching, retry cooldown, opt-in persistence and local lyrics. Fullscreen/device behavior and real provider matches for your collection still require live testing.
