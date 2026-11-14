@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.4.0, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.4.1, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -124,3 +124,6 @@ When automatic lyrics is enabled in Music library settings, exact LRCLIB lookup 
 
 ### App experience redesign (0.4.0)
 A unified Mythic Reverie layout for browsing, title pages, music, account forms and menus. Desktop screens use a library rail; tablets use a compact header; phones have Home, Movies, TV, Music and Search in the bottom bar. Additional discovery routes remain available in the profile menu at every screen size. Movie titles now participate in the home spotlight and have movie-specific detail labels. Shared spacing, typography, artwork grids, quieter cards, touch targets, keyboard focus, reduced-motion styles and safe-area positioning apply across the web app. Video playback retains the full screen. Navbar listeners are disposed on navigation to prevent detached menus accumulating. A separate standalone design preview uses sample titles and is not a screenshot of a running server. Visual/device validation could not be completed in the available browser environment. Native APK/iOS app interfaces are not changed by this web release.
+
+### Music library and player (0.4.1)
+Albums, Artists and Songs provide three searchable library views with bounded rendering. Album art opens an album detail view; separate play buttons start playback. Album pages include Play and Shuffle, while song menus offer Play Next and Add to Queue. Queue insertion preserves the current song and avoids duplicate entries. The mini-player artwork/title opens Now Playing. The page player is compact and the fullscreen artwork is scaled to the available window height, with a two-column lyrics view on larger screens and stacked controls on phones. Short desktop windows use a smaller artwork budget. Existing auto-fullscreen, lyrics matching, ambient/Earth options and media controls remain available. The layout is inspired by familiar music players and retains Mythic Reverie branding; it does not integrate with Apple Music. Device visual checks remain outstanding.
