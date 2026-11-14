@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.4.2, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.4.3, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -130,3 +130,6 @@ Albums, Artists and Songs provide three searchable library views with bounded re
 
 ### 4K movie intro uploads (0.4.2)
 Movie intro uploads now accept MP4 files up to 1 GB (1,024 MiB), including 4K. Uploads stream to a temporary file and atomically replace the saved intro only on success; failed or cancelled uploads retain the previous intro. Progress and cancellation controls are included. Video bytes are preserved without downscaling or transcoding. H.264 with AAC is recommended for browser compatibility; device decoding capability still determines 4K playback. If behind a reverse proxy, its body-size limit and request timeout must also allow the file. Earlier references to 80 MB describe the old limit. Movie-only playback and Skip intro remain unchanged.
+
+### MKV movie intros (0.4.3)
+Movie intro upload accepts MKV as well as MP4. MKV requires FFmpeg and FFprobe on the server and is converted to a browser-compatible MP4 before replacing the saved intro. Existing H.264 video is copied; other video codecs are encoded as H.264 without a scaling filter. Audio becomes AAC. Upload and conversion status are shown separately, and a cancelled or failed conversion leaves the previous intro intact. Conversion is limited to one job at a time, a 20-minute conversion timeout and a 2 GB output bound, with intermediates cleaned up. The 1 GB input limit remains. Original resolution is retained; a filename saying 4K does not change the underlying video's dimensions.
