@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.4.1, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.4.2, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -127,3 +127,6 @@ A unified Mythic Reverie layout for browsing, title pages, music, account forms 
 
 ### Music library and player (0.4.1)
 Albums, Artists and Songs provide three searchable library views with bounded rendering. Album art opens an album detail view; separate play buttons start playback. Album pages include Play and Shuffle, while song menus offer Play Next and Add to Queue. Queue insertion preserves the current song and avoids duplicate entries. The mini-player artwork/title opens Now Playing. The page player is compact and the fullscreen artwork is scaled to the available window height, with a two-column lyrics view on larger screens and stacked controls on phones. Short desktop windows use a smaller artwork budget. Existing auto-fullscreen, lyrics matching, ambient/Earth options and media controls remain available. The layout is inspired by familiar music players and retains Mythic Reverie branding; it does not integrate with Apple Music. Device visual checks remain outstanding.
+
+### 4K movie intro uploads (0.4.2)
+Movie intro uploads now accept MP4 files up to 1 GB (1,024 MiB), including 4K. Uploads stream to a temporary file and atomically replace the saved intro only on success; failed or cancelled uploads retain the previous intro. Progress and cancellation controls are included. Video bytes are preserved without downscaling or transcoding. H.264 with AAC is recommended for browser compatibility; device decoding capability still determines 4K playback. If behind a reverse proxy, its body-size limit and request timeout must also allow the file. Earlier references to 80 MB describe the old limit. Movie-only playback and Skip intro remain unchanged.
