@@ -1,13 +1,15 @@
 // ---------------- Navbar ----------------
+let navbarEvents;
 function renderNavbar(activeRoute) {
   const p = Store.activeProfile;
   const avatar = p ? p.avatar : AVAILABLE_AVATARS[0];
   const isAdmin = Store.account && Store.account.role === 'admin';
   return `
-  <nav class="navbar" id="navbar">
+  <button class="mr-skip" id="mrSkip" type="button">Skip to content</button>
+  <nav class="navbar" id="navbar" aria-label="Main navigation">
     <div class="nav-left">
       <a href="#/" class="logo-link"><img src="/img/io-logo.svg" class="logo-mark" alt="${escapeHtml(Store.config.siteName)}"/></a>
-      <ul class="nav-links">
+      <p class="mr-nav-caption">EXPLORE</p><ul class="nav-links">
         <li><a href="#/" class="${activeRoute === 'home' ? 'active' : ''}">Home</a></li>
         <li><a href="#/series" class="${activeRoute === 'series' ? 'active' : ''}">TV Shows</a></li>
         <li><a href="#/movies" class="${activeRoute === 'movies' ? 'active' : ''}">Movies</a></li>
@@ -15,7 +17,7 @@ function renderNavbar(activeRoute) {
         <li><a href="#/new" class="${activeRoute === 'new' ? 'active' : ''}">New &amp; Popular</a></li>
         <li><a href="#/genres" class="${activeRoute === 'genres' ? 'active' : ''}">Genres</a></li>
         <li><a href="#/calendar" class="${activeRoute === 'calendar' ? 'active' : ''}">Calendar</a></li>
-      </ul>
+      </ul><div class="mr-personal-nav"><p class="mr-nav-caption">YOUR SPACE</p><a href="#/account/${p ? p.id : ''}">My list &amp; profile</a><a href="#/history">Watch history</a><a href="#/settings">Settings</a></div>
     </div>
     <div class="nav-right">
       <button class="icon-btn" id="shuffleBtn" title="Surprise Me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg></button>
@@ -30,7 +32,7 @@ function renderNavbar(activeRoute) {
           <div class="notif-list" id="notifList"><div class="notif-empty">Loading&hellip;</div></div>
         </div>
       </div>
-      <button class="profile-chip" id="profileChipBtn">
+      <button class="profile-chip" id="profileChipBtn" aria-label="Open profile menu" aria-expanded="false" aria-controls="profileMenu">
         <img src="${avatar}" alt="" />
         <span class="chevron">&#9660;</span>
       </button>
@@ -47,7 +49,7 @@ function renderNavbar(activeRoute) {
     <ul>
       <li><a href="#/switch-profile">&#128100; Switch Profile</a></li>
       <li><a href="#/account/${p ? p.id : ''}">&#10084; My List</a></li>
-      <li><a href="#/history">&#128337; Watch History</a></li>
+      <li><a href="#/history">&#128337; Watch History</a></li><li><a href="#/new">New &amp; popular</a></li><li><a href="#/genres">Browse genres</a></li><li><a href="#/calendar">Release calendar</a></li>
       <li><a href="#/stats">&#128202; Library Stats</a></li>
       <li><button id="signInDeviceBtn">&#128241; Sign In Another Device</button></li>
       <li><a href="#/settings">&#9881; Settings</a></li>
@@ -57,26 +59,31 @@ function renderNavbar(activeRoute) {
       <li class="divider"><button class="signout" id="signOutBtn">&#8618; Sign out</button></li>
     </ul>
   </div>
-  <nav class="io-mobile-nav" aria-label="Main navigation"><a href="#/" class="${activeRoute === 'home' ? 'active' : ''}"><span>⌂</span>Home</a><a href="#/search"><span>◎</span>Discover</a><a href="#/account/${p ? p.id : ''}"><span>♡</span>My List</a><a href="#/account/${p ? p.id : ''}"><span>♙</span>Account</a></nav>`;
+  <nav class="io-mobile-nav" aria-label="Mobile navigation"><a href="#/" class="${activeRoute === 'home' ? 'active' : ''}"><span aria-hidden="true">⌂</span>Home</a><a href="#/movies" class="${activeRoute === 'movies' ? 'active' : ''}"><span aria-hidden="true">▣</span>Movies</a><a href="#/series" class="${activeRoute === 'series' ? 'active' : ''}"><span aria-hidden="true">▤</span>TV</a><a href="#/music" class="${activeRoute === 'music' ? 'active' : ''}"><span aria-hidden="true">♫</span>Music</a><a href="#/search"><span aria-hidden="true">⌕</span>Search</a></nav>`;
 }
 
 function wireNavbar() {
-  const navbar = document.getElementById('navbar');
+  navbarEvents?.abort();navbarEvents=new AbortController();const signal=navbarEvents.signal;
+  const navbar = document.getElementById('navbar');if(!navbar)return;
+  navbar.querySelectorAll('a.active').forEach(a=>a.setAttribute('aria-current','page'));document.querySelectorAll('.io-mobile-nav a.active').forEach(a=>a.setAttribute('aria-current','page'));
+  document.getElementById('mrSkip').onclick=()=>{const content=document.querySelector('main,.page-wrap,.hero,.detail-content,.cm-page');if(content){content.tabIndex=-1;content.focus();}};
+  window.addEventListener('hashchange',()=>navbarEvents?.abort(),{once:true,signal});
   window.addEventListener('scroll', () => {
     if (window.scrollY > 10) navbar.classList.add('scrolled');
     else navbar.classList.remove('scrolled');
-  });
+  },{signal,passive:true});
   const chip = document.getElementById('profileChipBtn');
   const menu = document.getElementById('profileMenu');
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
     chip.classList.toggle('open');
-    menu.classList.toggle('open');
+    menu.classList.toggle('open');chip.setAttribute('aria-expanded',String(menu.classList.contains('open')));
   });
   document.addEventListener('click', () => {
     chip.classList.remove('open');
-    menu.classList.remove('open');
-  });
+    menu.classList.remove('open');chip.setAttribute('aria-expanded','false');
+  },{signal});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open')){menu.classList.remove('open');chip.classList.remove('open');chip.setAttribute('aria-expanded','false');chip.focus();}},{signal});
   document.getElementById('signOutBtn').addEventListener('click', async () => {
     await API.logout().catch(() => {});
     Store.activeProfile = null;

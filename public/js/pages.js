@@ -4,7 +4,7 @@ async function pageHome(root) {
   // Newest-first by when each title was actually added to the library
   // (not release year - a 2015 series you just downloaded still shows
   // up here first), same field the Recently Added row already uses.
-  const heroPool = Store.filterForActiveProfile([...Store.anime])
+  const heroPool = Store.filterForActiveProfile([...Store.anime, ...Store.movies])
     .filter((s) => s.dateAdded)
     .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
     .slice(0, 5);
@@ -562,7 +562,7 @@ async function pageDetail(root, id) {
           <div class="detail-meta">
             <span class="badge">${escapeHtml(show.rating || '16+')}</span>
             <span>${show.year || ''}</span>
-            <span>${show.episodeCount} episodes</span>
+            <span>${Store.movies.some(m=>m.id===show.id)?'Movie':show.episodeCount+' episodes'}</span>
             ${(show.studios || []).map((s) => `<a href="#/studio/${encodeURIComponent(s)}" class="detail-studio-link">${escapeHtml(s)}</a>`).join('')}
           </div>
           ${show.omdb ? `<p class="detail-meta">${escapeHtml([show.omdb.runtime,show.omdb.imdbRating ? 'IMDb '+show.omdb.imdbRating+'/10' : ''].filter(Boolean).join(' · '))}</p><p class="cm-muted">${show.omdb.director ? 'Director: '+escapeHtml(show.omdb.director)+'<br>' : ''}${show.omdb.actors ? 'Cast: '+escapeHtml(show.omdb.actors)+'<br>' : ''}Metadata: <a href="https://www.omdbapi.com/" target="_blank" rel="noopener">OMDb</a>${/^tt\d{7,10}$/.test(show.imdbId||'') ? ` · <a href="https://www.imdb.com/title/${encodeURIComponent(show.imdbId)}/" target="_blank" rel="noopener">IMDb</a>` : ''}</p>` : ''}
@@ -580,7 +580,7 @@ async function pageDetail(root, id) {
     </div>
     <div class="episodes-wrap">
       <div class="episodes-header-row">
-        <h2 class="row-title" style="margin-bottom:0;padding:0">Episodes</h2>
+        <h2 class="row-title" style="margin-bottom:0;padding:0">${Store.movies.some(m=>m.id===show.id)?'Watch movie':'Episodes'}</h2>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="season-pill-wrap">
             <button class="season-pill" id="seasonPillBtn">${escapeHtml(show.groups[0].name)}</button>

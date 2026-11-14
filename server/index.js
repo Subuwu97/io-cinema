@@ -69,7 +69,7 @@ const BUILTIN_AVATARS_DIR = path.join(BASE_DIR, 'public', 'img', 'avatars');
 // way. Used both for the startup banner and the JS/CSS cache-busting
 // query param below, so they can never drift out of sync with each
 // other.
-const BUILD_VERSION = 'mythic-reverie-0.3.7-lyrics';
+const BUILD_VERSION = 'mythic-reverie-0.4.0-experience';
 const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
 const SESSION_COOKIE = 'io_cinema_session';
 const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 days
