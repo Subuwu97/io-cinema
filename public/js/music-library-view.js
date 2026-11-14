@@ -1,0 +1,5 @@
+(function(root){
+ function indexLibrary(library){const tracks=new Map(),albums=new Map(),albumTracks=new Map();for(const album of library.albums||[])albums.set(album.id,album);for(const track of library.tracks||[]){tracks.set(track.id,track);if(!albumTracks.has(track.albumId))albumTracks.set(track.albumId,[]);albumTracks.get(track.albumId).push(track);}return{tracks,albums,albumTracks};}
+ function albumPage(albums,query='',limit=60,sort='title'){const q=query.trim().toLocaleLowerCase();const matches=albums.filter(a=>`${a.title} ${a.artist}`.toLocaleLowerCase().includes(q)).sort((a,b)=>String(sort==='artist'?a.artist:a.title).localeCompare(String(sort==='artist'?b.artist:b.title),undefined,{numeric:true,sensitivity:'base'})||String(a.title).localeCompare(String(b.title)));return{items:matches.slice(0,limit),total:matches.length};}
+ const api={indexLibrary,albumPage};if(typeof module==='object'&&module.exports)module.exports=api;else root.MusicLibraryView=api;
+})(typeof window==='undefined'?globalThis:window);

@@ -573,7 +573,7 @@ async function pageDetail(root, id) {
             <button class="btn btn-secondary" id="listBtn">${inList ? '&#10003; In My List' : '+ My List'}</button>
             <button class="btn-ghost" id="topPickBtn">${Store.isTopPick(show.id, 'anime') ? '&#9733; Top Pick' : '&#9734; Top Pick'}</button>
             <button class="btn-ghost" id="reviewBtn">&#128221; Write a Review</button>
-            ${Store.account && Store.account.role === 'admin' ? `<button class="btn-ghost" id="malImportBtn" title="Find movie or TV metadata in OMDb">Import from OMDb</button>` : ''}
+            ${Store.account && Store.account.role === 'admin' ? `<button class="btn-ghost" id="malImportBtn" title="Find movie or TV metadata in OMDb">Correct title match</button>` : ''}
           </div>
         </div>
       </div>

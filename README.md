@@ -34,7 +34,7 @@ Books/manga are not scanned and reader routes are disabled. MAL/AniList metadata
 
 ## Initial-release limits
 
-This is version 0.3.5, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
+This is version 0.3.7, an independent starting point, not a production certification. Automatic TMDB/TVDB matching is not implemented. Native I/O clients and launcher binaries are intentionally excluded because they connect to I/O and use its app identifiers. New Cinema clients can be built separately. Configure Cinema's own public URL and services; I/O's existing domain is unchanged.
 
 ## Attribution
 
@@ -115,3 +115,9 @@ Music has an album-led library and a cleaner fullscreen player. Choose Album col
 
 ### Optional movie intro (0.3.5)
 Place your browser-compatible H.264/AAC `movie-intro.mp4` in the server data folder (`cinema-data` by default, or your configured MYTHIC_REVERIE_DATA_DIR/IO_CINEMA_DATA_DIR). Restart after updating the source. The authenticated web player plays it before each movie, including resumed movies, with Skip intro; TV, live video and music are excluded. Missing/failed intros fall through to the movie. Movie resume position and watch progress exclude the intro. Native clients and remote casting do not run this web-only intro. The clip is supplied separately and is not included in the public repository. It does not calibrate or improve audio.
+
+### Playback and library fixes (0.3.6)
+Fixed movie intro routes hanging for signed-in users. Administrators can now upload an MP4 and test it under Settings → Movie intro; missing intros show a setup status. Keep using the separate supplied clip, not a public repository asset. Correct title match on a movie/TV title page searches OMDb again, replaces incorrect details after review, and optionally replaces the existing poster. Previous metadata and artwork are backed up beside the title. Music displays 60 albums per batch with full-library search and album/artist sorting, uses indexed track lookup, bounds the visible queue around the current track, and retains mini-player artwork between timer updates. Layout refinements cover narrow screens, touch controls, long titles and fullscreen options.
+
+### Lyrics matching (0.3.7)
+When automatic lyrics is enabled in Music library settings, exact LRCLIB lookup now falls back to structured and title search, with Unicode normalization, explicit parenthetical aliases and duration/version checks. Album mismatches no longer block a safe song/artist match. Both Japanese and Korean scripts are preserved. The player displays untimed text when only plain lyrics exist; those lyrics are not automatically scrolled or assigned invented timestamps. Find lyrics lets you search another spelling and explicitly choose a previewed match for the current browser session. Retry lookup bypasses negative results after a short cooldown. Old negative caches are invalidated, and failed lookups now expire after 15 minutes. Song changes use the current track duration rather than the previous recording. Not every track has lyrics in LRCLIB; local LRC files remain supported. Provider documentation: https://lrclib.net/docs.txt
