@@ -129,6 +129,8 @@ function analyzeStreams(probeData, filePath) {
     audioStreams,
     subtitleStreams,
     videoStream,
+    containerExtension: ext,
+    hdr: require('./hdr').describe(videoStream || {}),
     canPassthrough,
     canRangeSeek,
     videoCodecOk: videoOk,
@@ -324,17 +326,19 @@ function spawnTranscode({ filePath, audioStreamIndex, startSeconds, targetHeight
 // keyframe lands at each segment boundary regardless of encoder or
 // source framerate, so segments are clean and independently
 // decodable (needed for seeking to work reliably).
-function spawnHlsTranscode({ filePath, audioStreamIndex, targetHeight, reencodeVideo, hwaccel, copyAudio, audioChannels, outputDir, segmentSeconds, decodeHwaccel, startOffsetSeconds, subtitleFile, subtitleFonts, subtitleCwd }) {
+function spawnHlsTranscode({ filePath, audioStreamIndex, targetHeight, reencodeVideo, hwaccel, copyAudio, audioChannels, outputDir, segmentSeconds, decodeHwaccel, startOffsetSeconds, subtitleFile, subtitleFonts, subtitleCwd, toneMap }) {
   // libass runs on CPU frames before scaling/hardware upload. Paths are server-generated relative hashes.
+  if(toneMap){decodeHwaccel=false;hwaccel={type:'none'};reencodeVideo=true;}
   if(subtitleFile)decodeHwaccel=false;
   const { pre, args: videoArgs } = buildVideoEncodeArgs(targetHeight, reencodeVideo || !!subtitleFile, hwaccel, decodeHwaccel);
+  if(toneMap){const at=videoArgs.indexOf('-vf');if(at>=0)videoArgs.splice(at,2);videoArgs.unshift('-vf',require('./hdr').toneMapFilter(toneMap,targetHeight));videoArgs.push('-color_primaries','bt709','-color_trc','bt709','-colorspace','bt709','-color_range','tv');}
   if(subtitleFile){
     if(!/^styled-subs\/[a-f0-9]{64}\/track\.ass$/.test(subtitleFile)||!/^styled-subs\/[a-f0-9]{64}$/.test(subtitleFonts))throw Error('Invalid styled subtitle cache path');
     const shift=Number(startOffsetSeconds)||0,filters=[];
     if(shift)filters.push('setpts=PTS+'+shift+'/TB');
     filters.push('ass=filename='+subtitleFile+':fontsdir='+subtitleFonts);
     if(shift)filters.push('setpts=PTS-'+shift+'/TB');
-    const at=videoArgs.indexOf('-vf');if(at>=0)videoArgs[at+1]=filters.join(',')+','+videoArgs[at+1];else videoArgs.unshift('-vf',filters.join(','));
+    const at=videoArgs.indexOf('-vf');if(at>=0)videoArgs[at+1]=toneMap?videoArgs[at+1]+','+filters.join(','):filters.join(',')+','+videoArgs[at+1];else videoArgs.unshift('-vf',filters.join(','));
   }
   const audioArgs = buildAudioEncodeArgs(copyAudio, audioChannels);
   const segDuration = segmentSeconds || 6;

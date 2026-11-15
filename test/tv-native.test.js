@@ -3,6 +3,9 @@ const { test } = require("node:test"),
   express = require("express"),
   { DatabaseSync } = require("node:sqlite");
 test("native TV pairing binds the polling secret and owned PIN-protected profile; playback tokens are limited to approved streams and revoke immediately", async (t) => {
+  const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mythic-original-'));t.after(()=>fs.rmSync(temp,{recursive:true,force:true}));
+  const original=path.join(temp,'movie.mkv');fs.writeFileSync(original,'original-HDR-metadata-bytes');let hdrMode=false;
   const db = new DatabaseSync(":memory:");
   db.exec(
     `PRAGMA foreign_keys=ON;CREATE TABLE accounts(id TEXT PRIMARY KEY,approved INTEGER,adult_content_allowed INTEGER);INSERT INTO accounts VALUES('a',1,1),('b',1,1);CREATE TABLE profiles(id TEXT PRIMARY KEY,account_id TEXT REFERENCES accounts(id),name TEXT,is_kids INTEGER);INSERT INTO profiles VALUES('p','a','Alice',0),('q','b','Bob',0);CREATE TABLE top_picks(profile_id TEXT,item_type TEXT,item_id TEXT);CREATE TABLE episode_first_seen(show_id TEXT,first_seen_at TEXT);CREATE TABLE my_list(profile_id TEXT,item_type TEXT,item_id TEXT,PRIMARY KEY(profile_id,item_type,item_id));CREATE TABLE progress(profile_id TEXT,item_id TEXT,episode_rel_path TEXT,seconds REAL,duration REAL,updated_at TEXT,hidden INTEGER,PRIMARY KEY(profile_id,item_id));`,
@@ -23,6 +26,7 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
       ],
     },
     lib = {
+      resolveEpisodeFile:(id,episode)=>id==='s'&&episode==='one'?original:null,
       cache: { anime: [show], movies: [] },
       getShow: (id) => (id === "s" ? { ...show, rating } : null),
     };
@@ -39,7 +43,7 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
     profiles: { verifyPin: (_a, _p, pin) => pin === "1234" },
     getLibrary: () => lib,
     startHls: async (_id,_episode,options) => { if(options.audio!==undefined)assert.ok([2,3].includes(options.audio));return { cacheKey: options.audio===undefined?"stream123":"streamAudio" }; },
-    getMediaInfo:async()=>({audioStreams:[{index:2,language:'ja',title:'Japanese',codec:'aac'},{index:3,language:'eng',title:'English',codec:'aac'}],subtitleStreams:[{index:4,language:'eng',codec:'ass',imageBased:false},{index:5,language:'eng',codec:'hdmv_pgs_subtitle',imageBased:true}]}),
+    getMediaInfo:async()=>({...hdrMode?{videoStream:{color_transfer:'smpte2084'},videoCodec:'hevc',containerExtension:'.mkv',defaultAudioIndex:2}:{},audioStreams:[{index:2,language:'ja',title:'Japanese',codec:'aac'},{index:3,language:'eng',title:'English',codec:'aac'}],subtitleStreams:[{index:4,language:'eng',codec:'ass',imageBased:false},{index:5,language:'eng',codec:'hdmv_pgs_subtitle',imageBased:true}]}),
     getSubtitle:async(id,episode,track,shift)=>{assert.equal(id,'s');assert.equal(episode,'one');assert.equal(track,4);assert.equal(shift,12);return 'WEBVTT\n\n00:00.000 --> 00:02.000\nHello\n';},
     now: () => clock,
   });
@@ -169,7 +173,16 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
   assert.equal((await request('/subtitle?id=s&episode=one&track=4',null,null,null,'GET')).status,401);
   assert.equal((await request('/play',{id:'s',episode:'one',audio:99},null,grant.token)).status,400);
   assert.equal((await request('/play',{id:'s',episode:'one',audio:2},null,grant.token)).status,200);assert.equal((await request('/play',{id:'s',episode:'one',audio:3,offset:123},null,grant.token)).status,200);
-  const streamCookie = (await playback.json()).streamCookie;
+  hdrMode=true;
+  const direct=await(await request('/play',{id:'s',episode:'one',quality:'original',offset:42,capabilities:{hdr10:true,videoCodecs:['hevc'],audioCodecs:['aac']}},null,grant.token)).json();
+  assert.equal(direct.mode,'direct');assert.equal(direct.seekSeconds,42);assert.equal(direct.startOffsetSeconds,0);assert.equal(direct.dynamicRange,'HDR10');
+  const rawUrl=base.replace('/api/tv-native','')+direct.playlistUrl;
+  const raw=await fetch(rawUrl,{headers:{Authorization:'Bearer '+grant.token,Range:'bytes=0-7'}});assert.equal(raw.status,206);assert.equal(await raw.text(),'original');
+  assert.equal((await fetch(rawUrl)).status,401);
+  assert.equal((await request('/original?id=s&episode=other',null,null,grant.token,'GET')).status,404);
+  const sdr=await(await request('/play',{id:'s',episode:'one',quality:'original',forceSdr:true,capabilities:{hdr10:true,videoCodecs:['hevc'],audioCodecs:['aac']}},null,grant.token)).json();assert.equal(sdr.mode,'hls');
+  hdrMode=false;
+  const streamCookie = sdr.streamCookie;
   const media = {
     path: "/api/hls/stream123/playlist.m3u8",
     headers: { authorization: "Bearer " + grant.token },
@@ -197,6 +210,7 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
   );
   db.prepare("UPDATE profiles SET is_kids=1 WHERE id=?").run("p");
   rating = "Rx";
+  assert.equal((await fetch(rawUrl,{headers:{Authorization:'Bearer '+grant.token}})).status,404);
   assert.equal(tv.mediaAccount(media), null);
   assert.equal(tv.mediaAccount(cookieMedia), null);
   assert.equal(
@@ -209,6 +223,7 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
     200,
   );
   await request("/devices/" + grant.deviceId, null, "a", null, "DELETE");
+  assert.equal((await fetch(rawUrl,{headers:{Authorization:'Bearer '+grant.token}})).status,401);
   assert.equal(
     (await request("/catalog", null, null, grant.token, "GET")).status,
     401,

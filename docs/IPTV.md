@@ -10,6 +10,4 @@ Not yet included: XMLTV programme guide import, automatic refresh, catch-up, DVR
 
 ## HDR status
 
-The local-library Google TV playback path currently uses server HLS that re-encodes HEVC to 8-bit H.264. HDR10/Dolby Vision metadata is not preserved on that path, and explicit HDR-to-SDR tone mapping is not implemented. Browser direct playback may preserve a compatible source but is platform-dependent. Do not claim verified HDR10 or Dolby Vision support. Direct IPTV streams use the native device decoder, so HDR there depends on the source and TV; it has not been physically tested.
-
-Proper library HDR needs codec/HDR capability negotiation, original-stream delivery/remux where supported, explicit SDR tone mapping for fallback, Dolby Vision profile-aware handling, and tests on actual HDR displays.
+Server 0.4.5 and Google TV 0.3.0 add capability-checked original HDR playback and HLS SDR tone mapping. See [HDR playback](HDR.md) for profile limits and testing status. Direct IPTV HDR still depends on the provider stream and device.

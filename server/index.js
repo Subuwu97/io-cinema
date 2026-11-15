@@ -3047,7 +3047,7 @@ function isMobileUserAgent(userAgent, platformHint) {
 }
 
 function computeCacheKey(filePath, mtimeMs, opts) {
-  const keyParts = [filePath, mtimeMs, opts.audioStreamIndex, opts.targetHeight || 'orig', opts.reencodeVideo ? 1 : 0, opts.startOffsetSeconds || 0];
+  const keyParts = [filePath, mtimeMs, opts.toneMap ? 'sdr-tonemap-v1-'+opts.toneMap.base : 'no-tonemap', opts.audioStreamIndex, opts.targetHeight || 'orig', opts.reencodeVideo ? 1 : 0, opts.startOffsetSeconds || 0];
   if(opts.subtitleStreamIndex!==undefined)keyParts.push("ass-v1",opts.subtitleStreamIndex);
   return crypto.createHash('md5').update(keyParts.join('|')).digest('hex');
 }
@@ -3542,6 +3542,11 @@ async function resolveAndStartHlsSession(showId, relPath, { audio, quality, star
     const track=info?.subtitleStreams?.find(t=>t.index===subtitle);
     if(!Number.isInteger(subtitle)||!track||!['ass','ssa'].includes(track.codec))return {error:{status:400,message:'Choose a valid ASS/SSA subtitle track'}};
     Object.assign(transcodeOpts,await prepareStyledSubtitle(filePath,subtitle),{subtitleStreamIndex:subtitle,reencodeVideo:true});
+  }
+  const hdr=require('./hdr').describe(info?.videoStream || {});
+  if(hdr.hdr && hdr.base!=='sdr'){
+    if(!hdr.base)return {error:{status:422,message:'This Dolby Vision profile requires a compatible Dolby Vision device at Original quality; SDR conversion is unsupported.'}};
+    transcodeOpts.toneMap=hdr;transcodeOpts.reencodeVideo=true;transcodeOpts.hwaccel={type:'none'};
   }
   const stat = await mediaIO.stat(filePath);
   const cacheKey = computeCacheKey(filePath, stat.mtimeMs, transcodeOpts);

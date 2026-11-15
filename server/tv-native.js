@@ -324,6 +324,12 @@ function registerNativeTV(
         if(!info.subtitleStreams?.some(s=>s.index===b.subtitle&&['ass','ssa'].includes(s.codec)))throw Error('Styled subtitle track is not available');
         subtitle=b.subtitle;
       }
+      const mediaInfo = await getMediaInfo(title.id,b.episode);
+      const decision = require('./hdr').directDecision(mediaInfo,b.capabilities,{quality:b.quality,audio,forceSdr:b.forceSdr===true});
+      if(decision.direct){
+        if(!device(req))return res.sendStatus(401);
+        return res.json({mode:'direct',dynamicRange:decision.hdr.format,playlistUrl:'/api/tv-native/original?id='+encodeURIComponent(title.id)+'&episode='+encodeURIComponent(b.episode),startOffsetSeconds:0,seekSeconds:offset,subtitleBurnedIn:false});
+      }
       const result = await startHls(title.id, b.episode, {
         audio,
         subtitle,
@@ -344,16 +350,26 @@ function registerNativeTV(
         playlistUrl: "/api/hls/" + result.cacheKey + "/playlist.m3u8",
         startOffsetSeconds: offset,
         streamCookie: ticket,
+        mode: "hls",
+        dynamicRange: "SDR",
         subtitleBurnedIn: subtitle!==undefined,
       });
     }),
   );
+  app.get('/api/tv-native/original',safe(async(req,res)=>{
+    const d=auth(req,res);if(!d)return;
+    const library=getLibrary(),title=library.getShow(req.query.id),episode=req.query.episode;
+    if(!allowed(d,title)||typeof episode!=='string'||!(title.groups||[]).some(g=>g.episodes.some(e=>e.relPath===episode)))return res.sendStatus(404);
+    const file=library.resolveEpisodeFile(title.id,episode);if(!file)return res.sendStatus(404);
+    res.set('Cache-Control','private, no-store');
+    res.sendFile(file,error=>{if(error&&!res.headersSent)res.status(error.statusCode||500).end();});
+  }));
   app.get('/api/tv-native/playback-options',safe(async(req,res)=>{
     const d=auth(req,res);if(!d)return;const title=getLibrary().getShow(req.query.id);
     if(!allowed(d,title)||!(title.groups||[]).some(g=>g.episodes.some(e=>e.relPath===req.query.episode)))return res.sendStatus(404);
     const info=await getMediaInfo(title.id,req.query.episode);
     if(!device(req))return res.sendStatus(401);
-    res.json({qualities:['original','1080','720','480','360'],audio:(info.audioStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||''})),subtitles:(info.subtitleStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||'',supported:!s.imageBased}))});
+    res.json({hdr:require('./hdr').describe(info.videoStream),video:{codec:info.videoCodec,width:info.videoWidth,height:info.videoHeight},qualities:['original','1080','720','480','360'],audio:(info.audioStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||''})),subtitles:(info.subtitleStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||'',supported:!s.imageBased}))});
   }));
   app.get('/api/tv-native/subtitle',safe(async(req,res)=>{
     const d=auth(req,res);if(!d)return;
