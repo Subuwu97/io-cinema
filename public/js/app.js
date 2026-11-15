@@ -21,6 +21,7 @@ async function renderApp() {
   // like it freezes for a moment on the way back to the series page.
   if (typeof teardownActiveHlsPlayer === 'function') teardownActiveHlsPlayer();
 
+  window.MythicIPTV?.stop();
   const hash = location.hash || '#/';
   if (/^#\/(books|manga|read|novel|tracker)(\/|$)/.test(hash)) { location.hash='#/'; return; }
   const parts = hash.replace(/^#\//, '').split('/').filter(Boolean);
@@ -61,6 +62,10 @@ async function renderApp() {
     if(location.hash!==experienceRoute)return;
     if (parts.length === 0) {
       await pageHome(appRoot);
+    } else if (parts[0] === 'iptv') {
+      await MythicIPTV.page(appRoot);
+    } else if (parts[0] === 'iptv-settings') {
+      await MythicIPTV.settings(appRoot);
     } else if (parts[0] === 'music') {
       await CinemaMusic.page(appRoot);
     } else if (parts[0] === 'live') {

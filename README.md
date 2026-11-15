@@ -136,3 +136,7 @@ Movie intro upload accepts MKV as well as MP4. MKV requires FFmpeg and FFprobe o
 
 ### Google TV preview app
 A separate native Mythic Reverie TV app is available under [clients/google-tv](clients/google-tv). It uses a Netflix-inspired movie/TV layout with a featured backdrop, horizontal shelves, Continue Watching, search, watchlist, title details, QR pairing and Media3 playback with audio/subtitle controls. The application ID is `com.mythicreverie.tv`, independent of I/O TV. Default LAN server is editable. The first APK is a debug-signed sideload preview; package/signature verification passed, while physical-device and visual testing remain outstanding because the local emulator could not start. Native music and web movie pre-roll are not part of this first TV preview.
+
+## IPTV Live TV
+
+Server 0.4.4 and Google TV 0.2.0-preview support M3U playlist imports and Xtream Codes M3U export, channel groups and search. Configure in **Live TV → Manage IPTV provider**. See [IPTV setup and limitations](docs/IPTV.md), including current HDR limitations.

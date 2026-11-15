@@ -3,7 +3,7 @@ function ioLiveClock(time){return new Date(time).toLocaleTimeString([],{hour:'2-
 
 async function ioPageLive(root,channelId){
   if(channelId)return ioWatchLive(root,channelId);
-  root.innerHTML=renderNavbar('live')+`<main class="page-wrap io-tv-page"><h1>TV guide</h1><p class="io-muted-left">What's on I/O TV, now and later today. Pick a programme for details.</p>
+  root.innerHTML=renderNavbar('live')+`<main class="page-wrap io-tv-page"><h1>TV guide</h1><a href="#/iptv">IPTV channels</a><p class="io-muted-left">What's on Mythic Reverie TV, now and later today. Pick a programme for details.</p>
     <section><h2>On now</h2><div id="ioOnNow" class="io-on-now"></div></section>
     <section><div class="io-guide-heading"><h2 id="ioGuideDate"></h2><div><button id="ioGuideEarlier" aria-label="Earlier">‹</button><button id="ioGuideNow">Now</button><button id="ioGuideLater" aria-label="Later">›</button></div></div>
     <div id="ioGuideStatus" role="status"></div><div class="io-tv-scroll"><div id="ioTVGrid" class="io-tv-grid"></div></div></section>

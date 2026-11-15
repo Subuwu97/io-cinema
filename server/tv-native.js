@@ -400,6 +400,7 @@ function registerNativeTV(
     res.json({ ok: true });
   });
   return {
+    authenticate: auth,
     mediaAccount(req) {
       if (req.method === 'GET' && /^\/media-asset\/(anime|movies)\/[^/]+\/[^/]+$/.test(req.path)) {
         const d = device(req);

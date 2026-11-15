@@ -13,6 +13,7 @@ function renderNavbar(activeRoute) {
         <li><a href="#/" class="${activeRoute === 'home' ? 'active' : ''}">Home</a></li>
         <li><a href="#/series" class="${activeRoute === 'series' ? 'active' : ''}">TV Shows</a></li>
         <li><a href="#/movies" class="${activeRoute === 'movies' ? 'active' : ''}">Movies</a></li>
+        <li><a href="#/iptv" class="${activeRoute === 'iptv' ? 'active' : ''}">Live TV</a></li>
         <li><a href="#/music" class="${activeRoute === 'music' ? 'active' : ''}">Music</a></li>
         <li><a href="#/new" class="${activeRoute === 'new' ? 'active' : ''}">New &amp; Popular</a></li>
         <li><a href="#/genres" class="${activeRoute === 'genres' ? 'active' : ''}">Genres</a></li>
@@ -50,6 +51,7 @@ function renderNavbar(activeRoute) {
       <li><a href="#/switch-profile">&#128100; Switch Profile</a></li>
       <li><a href="#/account/${p ? p.id : ''}">&#10084; My List</a></li>
       <li><a href="#/history">&#128337; Watch History</a></li><li><a href="#/new">New &amp; popular</a></li><li><a href="#/genres">Browse genres</a></li><li><a href="#/calendar">Release calendar</a></li>
+      <li><a href="#/iptv">Live TV / IPTV</a></li>
       <li><a href="#/stats">&#128202; Library Stats</a></li>
       <li><button id="signInDeviceBtn">&#128241; Sign In Another Device</button></li>
       <li><a href="#/settings">&#9881; Settings</a></li>
