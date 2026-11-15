@@ -1,6 +1,6 @@
 {
   "name": "mythic-reverie",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Mythic Reverie \u2014 your private world of movies, TV and music. Based on I/O and Minami.",
   "main": "server/index.js",
   "scripts": {

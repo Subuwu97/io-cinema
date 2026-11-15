@@ -11,13 +11,14 @@ function directDecision(info, caps = {}, options = {}) {
   caps = caps && typeof caps === 'object' ? caps : {};
   const hdr = describe(info.videoStream);
   const container = info.containerExtension;
-  if (!hdr.hdr || options.forceSdr || options.quality !== 'original') return {direct: false, hdr};
+  if ((!hdr.hdr && !options.allowSdrOriginal) || options.forceSdr || options.quality !== 'original') return {direct: false, hdr};
   if (!['.mkv', '.mp4', '.m4v', '.webm'].includes(container)) return {direct: false, hdr};
   const codec = info.videoCodec;
   const audio = (info.audioStreams || []).find(t => t.index === (options.audio ?? info.defaultAudioIndex));
   if (audio && !Array.isArray(caps.audioCodecs) || audio && !caps.audioCodecs.includes(audio.codec)) return {direct: false, hdr};
   const decodes = Array.isArray(caps.videoCodecs) && caps.videoCodecs.includes(codec);
   if (!decodes) return {direct: false, hdr};
+  if (!hdr.hdr) return {direct: true, hdr};
   if (hdr.format === 'Dolby Vision') {
     // Do not claim dual-layer Profile 7/FEL support from a generic DV decoder.
     const supported = [5,8].includes(hdr.profile) && caps.dolbyVision === true && Array.isArray(caps.dvProfiles) && caps.dvProfiles.includes(hdr.profile);

@@ -3047,7 +3047,7 @@ function isMobileUserAgent(userAgent, platformHint) {
 }
 
 function computeCacheKey(filePath, mtimeMs, opts) {
-  const keyParts = [filePath, mtimeMs, opts.toneMap ? 'sdr-tonemap-v1-'+opts.toneMap.base : 'no-tonemap', opts.audioStreamIndex, opts.targetHeight || 'orig', opts.reencodeVideo ? 1 : 0, opts.startOffsetSeconds || 0];
+  const keyParts = [filePath, mtimeMs, opts.audioMode || 'auto', opts.toneMap ? 'sdr-tonemap-v1-'+opts.toneMap.base : 'no-tonemap', opts.audioStreamIndex, opts.targetHeight || 'orig', opts.reencodeVideo ? 1 : 0, opts.startOffsetSeconds || 0];
   if(opts.subtitleStreamIndex!==undefined)keyParts.push("ass-v1",opts.subtitleStreamIndex);
   return crypto.createHash('md5').update(keyParts.join('|')).digest('hex');
 }
@@ -3500,7 +3500,7 @@ app.post('/api/precache/:showId/*', async (req, res) => {
 // used by both the original single-quality hls-start route and the
 // newer adaptive-bitrate routes below, so they can never drift out of
 // sync on how a session actually gets resolved and started.
-async function resolveAndStartHlsSession(showId, relPath, { audio, quality, startOffsetSeconds, subtitle } = {}) {
+async function resolveAndStartHlsSession(showId, relPath, { audio, quality, startOffsetSeconds, subtitle, audioMode } = {}) {
   const filePath = library.resolveEpisodeFile(showId, relPath);
   if (!filePath) return { error: { status: 404, message: 'Episode not found' } };
   if (!ffm.HAS_FFMPEG) return { error: { status: 501, message: 'ffmpeg is not installed on this server' } };
@@ -3536,7 +3536,7 @@ async function resolveAndStartHlsSession(showId, relPath, { audio, quality, star
   const copyAudio = !!(selectedAudioTrack && selectedAudioTrack.codec === 'aac');
   const audioChannels = selectedAudioTrack ? selectedAudioTrack.channels : null;
   const hwaccel = hwaccelLib.detectHwAccel(config.hardwareAcceleration);
-  const transcodeOpts = { audioStreamIndex: audioIndex, targetHeight: requestedQuality, reencodeVideo, hwaccel, copyAudio, audioChannels, sourceVideoCodec: info ? info.videoCodec : null, startOffsetSeconds: startOffsetSeconds || 0 };
+  const transcodeOpts = { audioStreamIndex: audioIndex, targetHeight: requestedQuality, reencodeVideo, hwaccel, copyAudio, audioChannels, audioMode, sourceVideoCodec: info ? info.videoCodec : null, startOffsetSeconds: startOffsetSeconds || 0 };
 
   if(subtitle!==undefined&&subtitle!==null){
     const track=info?.subtitleStreams?.find(t=>t.index===subtitle);

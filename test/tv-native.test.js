@@ -42,7 +42,7 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
     },
     profiles: { verifyPin: (_a, _p, pin) => pin === "1234" },
     getLibrary: () => lib,
-    startHls: async (_id,_episode,options) => { if(options.audio!==undefined)assert.ok([2,3].includes(options.audio));return { cacheKey: options.audio===undefined?"stream123":"streamAudio" }; },
+    startHls: async (_id,_episode,options) => { if(options.audioMode!==undefined)assert.ok(['auto','stereo','night'].includes(options.audioMode)); if(options.audio!==undefined)assert.ok([2,3].includes(options.audio));return { cacheKey: options.audio===undefined?"stream123":"streamAudio" }; },
     getMediaInfo:async()=>({...hdrMode?{videoStream:{color_transfer:'smpte2084'},videoCodec:'hevc',containerExtension:'.mkv',defaultAudioIndex:2}:{},audioStreams:[{index:2,language:'ja',title:'Japanese',codec:'aac'},{index:3,language:'eng',title:'English',codec:'aac'}],subtitleStreams:[{index:4,language:'eng',codec:'ass',imageBased:false},{index:5,language:'eng',codec:'hdmv_pgs_subtitle',imageBased:true}]}),
     getSubtitle:async(id,episode,track,shift)=>{assert.equal(id,'s');assert.equal(episode,'one');assert.equal(track,4);assert.equal(shift,12);return 'WEBVTT\n\n00:00.000 --> 00:02.000\nHello\n';},
     now: () => clock,
@@ -180,6 +180,10 @@ test("native TV pairing binds the polling secret and owned PIN-protected profile
   const raw=await fetch(rawUrl,{headers:{Authorization:'Bearer '+grant.token,Range:'bytes=0-7'}});assert.equal(raw.status,206);assert.equal(await raw.text(),'original');
   assert.equal((await fetch(rawUrl)).status,401);
   assert.equal((await request('/original?id=s&episode=other',null,null,grant.token,'GET')).status,404);
+  for(const audioMode of ['stereo','night']){
+    const converted=await(await request('/play',{id:'s',episode:'one',quality:'original',audioMode,capabilities:{hdr10:true,videoCodecs:['hevc'],audioCodecs:['aac']}},null,grant.token)).json();assert.equal(converted.mode,'hls');assert.match(converted.audioOutput,/stereo|Stereo/);
+  }
+  assert.equal((await request('/play',{id:'s',episode:'one',audioMode:'fake-atmos'},null,grant.token)).status,400);
   const sdr=await(await request('/play',{id:'s',episode:'one',quality:'original',forceSdr:true,capabilities:{hdr10:true,videoCodecs:['hevc'],audioCodecs:['aac']}},null,grant.token)).json();assert.equal(sdr.mode,'hls');
   hdrMode=false;
   const streamCookie = sdr.streamCookie;

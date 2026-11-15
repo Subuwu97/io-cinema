@@ -91,6 +91,8 @@ function trackLabel(stream, kindLetter, idx) {
     codec: stream.codec_name,
     imageBased: IMAGE_SUBTITLE_CODECS.has(stream.codec_name),
     channels: stream.channels || null,
+    profile: stream.profile || null,
+    sampleRate: Number(stream.sample_rate) || null,
     default: !!(stream.disposition && stream.disposition.default),
     forced: !!(stream.disposition && stream.disposition.forced),
   };
@@ -255,7 +257,8 @@ function buildVideoEncodeArgs(targetHeight, reencodeVideo, hwaccel, decodeHwacce
 // copy it bit-for-bit instead of needlessly re-encoding - re-encoding
 // audio that doesn't need it is a pointless second lossy compression
 // pass with no benefit, just quality loss and wasted CPU.
-function buildAudioEncodeArgs(copyAudio, channels) {
+function buildAudioEncodeArgs(copyAudio, channels, mode) {
+  if(mode==='stereo'||mode==='night')return ['-c:a','aac','-b:a','256k','-ac','2',...(mode==='night'?['-af','aformat=channel_layouts=stereo,acompressor=threshold=0.125:ratio=4:attack=20:release=250:makeup=1,alimiter=limit=0.95']:[])];
   if (copyAudio) return ['-c:a', 'copy'];
   // Scale bitrate with channel count so surround sources don't get
   // starved - 96kbps/channel keeps stereo at a clearly-above-average
@@ -326,7 +329,7 @@ function spawnTranscode({ filePath, audioStreamIndex, startSeconds, targetHeight
 // keyframe lands at each segment boundary regardless of encoder or
 // source framerate, so segments are clean and independently
 // decodable (needed for seeking to work reliably).
-function spawnHlsTranscode({ filePath, audioStreamIndex, targetHeight, reencodeVideo, hwaccel, copyAudio, audioChannels, outputDir, segmentSeconds, decodeHwaccel, startOffsetSeconds, subtitleFile, subtitleFonts, subtitleCwd, toneMap }) {
+function spawnHlsTranscode({ filePath, audioStreamIndex, targetHeight, reencodeVideo, hwaccel, copyAudio, audioChannels, outputDir, segmentSeconds, decodeHwaccel, startOffsetSeconds, subtitleFile, subtitleFonts, subtitleCwd, toneMap, audioMode }) {
   // libass runs on CPU frames before scaling/hardware upload. Paths are server-generated relative hashes.
   if(toneMap){decodeHwaccel=false;hwaccel={type:'none'};reencodeVideo=true;}
   if(subtitleFile)decodeHwaccel=false;
@@ -340,7 +343,7 @@ function spawnHlsTranscode({ filePath, audioStreamIndex, targetHeight, reencodeV
     if(shift)filters.push('setpts=PTS-'+shift+'/TB');
     const at=videoArgs.indexOf('-vf');if(at>=0)videoArgs[at+1]=toneMap?videoArgs[at+1]+','+filters.join(','):filters.join(',')+','+videoArgs[at+1];else videoArgs.unshift('-vf',filters.join(','));
   }
-  const audioArgs = buildAudioEncodeArgs(copyAudio, audioChannels);
+  const audioArgs = buildAudioEncodeArgs(copyAudio, audioChannels, audioMode);
   const segDuration = segmentSeconds || 6;
   // Hardware-accelerated decode, not just encode - matters most for a
   // source codec that's expensive to decode in software (AV1 in
@@ -425,4 +428,5 @@ module.exports = {
   killAllLive,
   trackLive,
   BROWSER_AUDIO_CODECS,
+  buildAudioEncodeArgs,
 };

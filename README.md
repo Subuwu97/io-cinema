@@ -144,3 +144,7 @@ Server 0.4.4 and Google TV 0.2.0-preview support M3U playlist imports and Xtream
 ## HDR on Google TV
 
 Server 0.4.5 and Google TV 0.3.0-preview add original-file HDR10/HLG and supported Dolby Vision profile 5/8 playback, with HDR-to-SDR HLS fallback. See [HDR requirements and limitations](docs/HDR.md). Update both server and APK.
+
+## Receiver audio
+
+Server 0.4.6 / Google TV 0.4.0-preview add Auto/original surround, Stereo compatibility and Night mode. See [sound controls and limitations](docs/AUDIO.md).

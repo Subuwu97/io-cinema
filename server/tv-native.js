@@ -324,14 +324,16 @@ function registerNativeTV(
         if(!info.subtitleStreams?.some(s=>s.index===b.subtitle&&['ass','ssa'].includes(s.codec)))throw Error('Styled subtitle track is not available');
         subtitle=b.subtitle;
       }
+      if(b.audioMode!==undefined&&!['auto','stereo','night'].includes(b.audioMode))throw Error('Choose a supported audio mode');
       const mediaInfo = await getMediaInfo(title.id,b.episode);
-      const decision = require('./hdr').directDecision(mediaInfo,b.capabilities,{quality:b.quality,audio,forceSdr:b.forceSdr===true});
+      const decision = require('./hdr').directDecision(mediaInfo,b.capabilities,{quality:b.quality,audio,forceSdr:b.forceSdr===true||['stereo','night'].includes(b.audioMode),allowSdrOriginal:b.audioMode==='auto'});
       if(decision.direct){
         if(!device(req))return res.sendStatus(401);
-        return res.json({mode:'direct',dynamicRange:decision.hdr.format,playlistUrl:'/api/tv-native/original?id='+encodeURIComponent(title.id)+'&episode='+encodeURIComponent(b.episode),startOffsetSeconds:0,seekSeconds:offset,subtitleBurnedIn:false});
+        return res.json({mode:'direct',audioOutput:'Original soundtrack - receiver output negotiated by Android',dynamicRange:decision.hdr.format,playlistUrl:'/api/tv-native/original?id='+encodeURIComponent(title.id)+'&episode='+encodeURIComponent(b.episode),startOffsetSeconds:0,seekSeconds:offset,subtitleBurnedIn:false});
       }
       const result = await startHls(title.id, b.episode, {
         audio,
+        audioMode:b.audioMode,
         subtitle,
         quality: b.quality || "720",
         startOffsetSeconds: offset,
@@ -351,6 +353,7 @@ function registerNativeTV(
         startOffsetSeconds: offset,
         streamCookie: ticket,
         mode: "hls",
+        audioOutput:b.audioMode==='night'?'Night mode - stereo AAC':b.audioMode==='stereo'?'Stereo AAC':'Compatible AAC - Atmos not preserved',
         dynamicRange: "SDR",
         subtitleBurnedIn: subtitle!==undefined,
       });
@@ -369,7 +372,7 @@ function registerNativeTV(
     if(!allowed(d,title)||!(title.groups||[]).some(g=>g.episodes.some(e=>e.relPath===req.query.episode)))return res.sendStatus(404);
     const info=await getMediaInfo(title.id,req.query.episode);
     if(!device(req))return res.sendStatus(401);
-    res.json({hdr:require('./hdr').describe(info.videoStream),video:{codec:info.videoCodec,width:info.videoWidth,height:info.videoHeight},qualities:['original','1080','720','480','360'],audio:(info.audioStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||''})),subtitles:(info.subtitleStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||'',supported:!s.imageBased}))});
+    res.json({hdr:require('./hdr').describe(info.videoStream),video:{codec:info.videoCodec,width:info.videoWidth,height:info.videoHeight},qualities:['original','1080','720','480','360'],audio:(info.audioStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||'',channels:s.channels||null,profile:s.profile||'',sampleRate:s.sampleRate||null})),subtitles:(info.subtitleStreams||[]).map(s=>({index:s.index,language:s.language||'und',title:s.title||'',codec:s.codec||'',supported:!s.imageBased}))});
   }));
   app.get('/api/tv-native/subtitle',safe(async(req,res)=>{
     const d=auth(req,res);if(!d)return;
