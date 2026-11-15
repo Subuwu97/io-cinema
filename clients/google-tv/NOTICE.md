@@ -1,0 +1,2 @@
+# Attribution
+This Google TV client adapts the native Android TV client from the I/O project (Subuwu97/io), itself associated with the Minami/I/O codebase described in the repository UPSTREAM.md. The adaptation introduces a separate Mythic Reverie app identity, configuration and branding. AndroidX Media3 and ZXing retain their respective upstream licenses. No Netflix assets, branding, API or service integration are included.

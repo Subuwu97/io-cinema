@@ -1,0 +1,7 @@
+package com.mythicreverie.tv;
+import android.content.Context;import android.graphics.*;import android.view.View;
+public final class BrandLoginArt extends View{
+ private final Bitmap bitmap;private final boolean logo;private final Paint paint=new Paint(3);
+ public BrandLoginArt(Context c,boolean logo){super(c);this.logo=logo;BitmapFactory.Options options=new BitmapFactory.Options();options.inScaled=false;bitmap=BitmapFactory.decodeResource(getResources(),R.drawable.io_brand_login,options);setFocusable(false);}
+ @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);if(logo){paint.setColor(0xffc6a16c);paint.setTypeface(Typeface.create("serif",Typeface.BOLD));paint.setTextAlign(Paint.Align.CENTER);paint.setTextSize(getHeight()*.37f);canvas.drawText("MYTHIC REVERIE",getWidth()/2f,getHeight()*.55f,paint);paint.setTextSize(getHeight()*.17f);paint.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));paint.setColor(0xffbcae9d);canvas.drawText("YOUR PRIVATE SCREEN",getWidth()/2f,getHeight()*.88f,paint);return;}if(bitmap==null)return;RectF box=new RectF(0,0,getWidth(),getHeight());float scale=Math.max(box.width()/bitmap.getWidth(),box.height()/bitmap.getHeight());float w=bitmap.getWidth()*scale,h=bitmap.getHeight()*scale;canvas.drawBitmap(bitmap,null,new RectF((getWidth()-w)/2,(getHeight()-h)/2,(getWidth()+w)/2,(getHeight()+h)/2),paint);}
+}
